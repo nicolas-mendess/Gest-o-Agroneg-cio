@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gestão Agronegócios</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-900: #0d3318;
+    --green-700: #1a5c2a;
+    --green-500: #2e8b47;
+    --green-300: #6dbf82;
+    --green-100: #e8f5ec;
+    --green-50:  #f4fbf6;
+    --amber-600: #b45309;
+    --amber-100: #fef3c7;
+    --red-600:   #dc2626;
+    --red-100:   #fee2e2;
+    --gray-900:  #111827;
+    --gray-600:  #4b5563;
+    --gray-400:  #9ca3af;
+    --gray-200:  #e5e7eb;
+    --gray-100:  #f3f4f6;
+    --white:     #ffffff;
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    animation: fadeIn 0.3s ease;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HOME ── */
+  .home-hero {
+    background: var(--green-900);
+    padding: 56px 28px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .home-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -30px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .home-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green-300);
+    margin-bottom: 12px;
+  }
+  .home-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    line-height: 1.12;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+  .home-title em { font-style: italic; color: var(--green-300); }
+  .home-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+  }
+
+  .home-body {
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+  }
+  .home-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    margin-bottom: 4px;
+  }
+
+  .module-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    text-decoration: none;
+    color: inherit;
+    user-select: none;
+  }
+  .module-card:hover {
+    border-color: var(--green-300);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .module-card:active { transform: scale(0.985); }
+  .module-card.primary {
+    background: var(--green-700);
+    border-color: var(--green-700);
+  }
+  .module-icon {
+    width: 50px; height: 50px;
+    border-radius: 14px;
+    background: var(--green-100);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .module-card.primary .module-icon { background: rgba(255,255,255,0.15); }
+  .module-info { flex: 1; }
+  .module-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 3px;
+  }
+  .module-card.primary .module-title { color: var(--white); }
+  .module-desc { font-size: 12px; color: var(--gray-400); }
+  .module-card.primary .module-desc { color: rgba(255,255,255,0.6); }
+  .module-arrow {
+    font-size: 20px;
+    color: var(--gray-200);
+    font-weight: 300;
+  }
+  .module-card.primary .module-arrow { color: rgba(255,255,255,0.3); }
+
+  .home-footer {
+    padding: 16px 24px 32px;
+    display: flex;
+    gap: 12px;
+  }
+  .stat-pill {
+    flex: 1;
+    background: var(--green-50);
+    border: 1px solid var(--green-100);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .stat-val { font-size: 20px; font-weight: 700; color: var(--green-700); }
+  .stat-lbl { font-size: 11px; color: var(--green-500); margin-top: 2px; }
+
+  /* ── INNER SCREENS ── */
+  .screen-header {
+    background: var(--green-900);
+    padding: 48px 24px 28px;
+    position: relative;
+  }
+  .screen-header.amber { background: var(--amber-600); }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    margin-bottom: 20px;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--white); }
+  .screen-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .screen-sub { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+  .screen-body {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    letter-spacing: 0.04em;
+  }
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--gray-100);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 0 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-wrap:focus-within {
+    border-color: var(--green-500);
+    box-shadow: 0 0 0 3px rgba(46,139,71,0.1);
+    background: var(--white);
+  }
+  .input-prefix { font-size: 13px; font-weight: 600; color: var(--gray-400); margin-right: 6px; white-space: nowrap; }
+  .input-wrap input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--gray-900);
+    padding: 14px 0;
+    width: 100%;
+  }
+  .input-wrap input::placeholder { color: var(--gray-400); font-weight: 400; font-size: 15px; }
+  .input-suffix { font-size: 13px; color: var(--gray-400); margin-left: 6px; }
+
+  .cta-btn {
+    background: var(--green-700);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 17px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(26,92,42,0.3);
+  }
+  .cta-btn:hover { background: var(--green-500); box-shadow: 0 6px 20px rgba(26,92,42,0.35); }
+  .cta-btn:active { transform: scale(0.98); }
+  .cta-btn.amber-btn {
+    background: var(--amber-600);
+    box-shadow: 0 4px 14px rgba(180,83,9,0.3);
+  }
+  .cta-btn.amber-btn:hover { background: #92400e; }
+
+  /* ── RESULTS ── */
+  .result-panel {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    animation: fadeIn 0.35s ease;
+  }
+  .result-panel.hidden { display: none; }
+  .result-panel-header {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 14px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .r-lbl { color: var(--gray-600); }
+  .result-row .r-val { font-weight: 700; color: var(--gray-900); }
+  .result-row .r-val.green { color: var(--green-500); font-size: 20px; }
+  .result-row .r-val.red { color: var(--red-600); font-size: 20px; }
+
+  .status-badge {
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeIn 0.4s ease;
+  }
+  .status-badge.hidden { display: none; }
+  .status-badge.success { background: var(--green-100); border: 2px solid var(--green-500); }
+  .status-badge.danger  { background: var(--red-100);   border: 2px solid var(--red-600); }
+  .status-badge.warning { background: var(--amber-100); border: 2px solid var(--amber-600); }
+  .badge-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .success .badge-dot { background: var(--green-500); box-shadow: 0 0 0 4px rgba(46,139,71,0.2); }
+  .danger  .badge-dot { background: var(--red-600);   box-shadow: 0 0 0 4px rgba(220,38,38,0.2); }
+  .warning .badge-dot { background: var(--amber-600); box-shadow: 0 0 0 4px rgba(180,83,9,0.2); }
+  .badge-text { font-size: 14px; font-weight: 700; }
+  .success .badge-text { color: var(--green-700); }
+  .danger  .badge-text { color: var(--red-600); }
+  .warning .badge-text { color: var(--amber-600); }
+  .badge-sub { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
+
+  .nutri-block {
+    background: var(--green-900);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+  .nutri-block.hidden { display: none; }
+  .nutri-block-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .nutri-block-title { font-size: 13px; font-weight: 700; color: var(--white); letter-spacing: 0.06em; text-transform: uppercase; }
+  .nutri-tag {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .nutri-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 13px;
+  }
+  .nutri-row:last-child { border-bottom: none; }
+  .nutri-row .nl { color: rgba(255,255,255,0.6); }
+  .nutri-row .nv { font-weight: 700; color: var(--white); }
+  .nutri-row .nv.big { font-size: 20px; color: var(--green-300); }
+
+  .rec-card {
+    background: var(--gray-100);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .rec-icon { font-size: 18px; flex-shrink: 0; }
+  .rec-text { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
+  .rec-text strong { color: var(--gray-900); }
+
+  .divider { height: 1px; background: var(--gray-200); }
+
+  /* ── SCROLLBAR ── */
+  .screen-body::-webkit-scrollbar { width: 4px; }
+  .screen-body::-webkit-scrollbar-track { background: transparent; }
+  .screen-body::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+
+  @media (min-width: 430px) {
+    body { padding: 24px 0; align-items: center; min-height: 100vh; }
+    .app { border-radius: 32px; min-height: auto; max-height: 90vh; box-shadow: var(--shadow-lg); overflow: hidden; }
+    .screen { max-height: 90vh; overflow-y: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="home-hero">
+      <div class="home-eyebrow">🌾 Sistema de Gestão Rural</div>
+      <h1 class="home-title">Gestão<br><em>Agronegócios</em></h1>
+      <p class="home-sub">Pecuária de corte · Safra 2025</p>
+    </div>
+    <div class="home-body">
+      <p class="home-section-label">Módulos</p>
+      <div class="module-card primary" onclick="navigate('financeiro')">
+        <div class="module-icon">💰</div>
+        <div class="module-info">
+          <div class="module-title">Gestão Financeira</div>
+          <div class="module-desc">Ganhos, custos e resultado</div>
+        </div>
+        <div class="module-arrow">›</div>
+      </div>
+      <div class="module-card" onclick="navigate('pesagem')">
+        <div class="module-icon">⚖️</div>
+        <div class="module-info">
+          <div class="module-title">Pesagem e Nutrição</div>
+          <div class="module-desc">Défice de peso e plano alimentar</div>
+        </div>
+        <div class="module-arrow">›</div>
+      </div>
+    </div>
+    <div class="home-footer">
+      <div class="stat-pill">
+        <div class="stat-val">CA</div>
+        <div class="stat-lbl">Conv. Alimentar 7,0</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-val">v1.0</div>
+        <div class="stat-lbl">Versão do sistema</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ FINANCEIRO ════════════════════════════ -->
+  <div class="screen" id="screen-financeiro">
+    <div class="screen-header">
+      <button class="back-btn" onclick="navigate('home')">← Menu Principal</button>
+      <h2 class="screen-title">Gestão Financeira</h2>
+      <p class="screen-sub">Calcule o resultado da operação</p>
+    </div>
+    <div class="screen-body">
+
+      <div class="field-group">
+        <label class="field-label">📈 Ganhos Totais</label>
+        <div class="input-wrap">
+          <span class="input-prefix">R$</span>
+          <input type="number" id="fin-ganhos" placeholder="0,00" min="0" step="0.01">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">📉 Custos Totais</label>
+        <div class="input-wrap">
+          <span class="input-prefix">R$</span>
+          <input type="number" id="fin-custos" placeholder="0,00" min="0" step="0.01">
+        </div>
+      </div>
+
+      <button class="cta-btn" onclick="calcularFinanceiro()">Calcular Resultado</button>
+
+      <div class="result-panel hidden" id="fin-resultado">
+        <div class="result-panel-header">Resumo Financeiro</div>
+        <div class="result-row">
+          <span class="r-lbl">Ganhos Totais</span>
+          <span class="r-val" id="fin-r-ganhos">—</span>
+        </div>
+        <div class="result-row">
+          <span class="r-lbl">Custos Totais</span>
+          <span class="r-val" id="fin-r-custos">—</span>
+        </div>
+        <div class="result-row">
+          <span class="r-lbl" style="font-weight:700;color:#111">Lucro / Prejuízo</span>
+          <span class="r-val" id="fin-r-lucro">—</span>
+        </div>
+      </div>
+
+      <div class="status-badge hidden" id="fin-status">
+        <div class="badge-dot"></div>
+        <div>
+          <div class="badge-text" id="fin-status-text"></div>
+          <div class="badge-sub" id="fin-status-sub"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ PESAGEM ══════════════════════════════ -->
+  <div class="screen" id="screen-pesagem">
+    <div class="screen-header">
+      <button class="back-btn" onclick="navigate('home')">← Menu Principal</button>
+      <h2 class="screen-title">Pesagem e Nutrição</h2>
+      <p class="screen-sub">Verifique o peso e plano alimentar</p>
+    </div>
+    <div class="screen-body">
+
+      <div class="field-group">
+        <label class="field-label">🎯 Peso Ideal / Meta</label>
+        <div class="input-wrap">
+          <input type="number" id="pes-ideal" placeholder="450" min="0" step="0.1">
+          <span class="input-suffix">kg</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">⚖️ Peso Atual na Balança</label>
+        <div class="input-wrap">
+          <input type="number" id="pes-atual" placeholder="380" min="0" step="0.1">
+          <span class="input-suffix">kg</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">🌽 Preço do KG de Ração</label>
+        <div class="input-wrap">
+          <span class="input-prefix">R$</span>
+          <input type="number" id="pes-preco" placeholder="3,50" min="0" step="0.01">
+        </div>
+      </div>
+
+      <button class="cta-btn" onclick="calcularPesagem()">Verificar Peso</button>
+
+      <div class="status-badge hidden" id="pes-status">
+        <div class="badge-dot"></div>
+        <div>
+          <div class="badge-text" id="pes-status-text"></div>
+          <div class="badge-sub" id="pes-status-sub"></div>
+        </div>
+      </div>
+
+      <div class="nutri-block hidden" id="nutri-panel">
+        <div class="nutri-block-header">
+          <span>🌽</span>
+          <span class="nutri-block-title">Plano de Nutrição</span>
+          <span class="nutri-tag">Automático</span>
+        </div>
+        <div class="nutri-row">
+          <span class="nl">Défice de peso</span>
+          <span class="nv" id="nutri-defice">—</span>
+        </div>
+        <div class="nutri-row">
+          <span class="nl">Conversão Alimentar (CA)</span>
+          <span class="nv">7,0</span>
+        </div>
+        <div class="nutri-row">
+          <span class="nl">KG de ração necessário</span>
+          <span class="nv" id="nutri-racao">—</span>
+        </div>
+        <div class="nutri-row">
+          <span class="nl">Preço por KG</span>
+          <span class="nv" id="nutri-preco-kg">—</span>
+        </div>
+        <div class="nutri-row">
+          <span class="nl">Custo total estimado</span>
+          <span class="nv big" id="nutri-custo">—</span>
+        </div>
+      </div>
+
+      <div class="rec-card hidden" id="nutri-rec">
+        <div class="rec-icon">📋</div>
+        <div class="rec-text">
+          <strong>Recomendação:</strong> acompanhar a dieta conforme o plano e pesar novamente em <strong>30 dias</strong>.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const BRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const KG  = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
+
+  function navigate(to) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + to).classList.add('active');
+    if (to === 'home') { resetFinanceiro(); resetPesagem(); }
+    window.scrollTo(0, 0);
+  }
+
+  function resetFinanceiro() {
+    ['fin-ganhos', 'fin-custos'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('fin-resultado').classList.add('hidden');
+    document.getElementById('fin-status').classList.add('hidden');
+  }
+
+  function resetPesagem() {
+    ['pes-ideal', 'pes-atual', 'pes-preco'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('pes-status').classList.add('hidden');
+    document.getElementById('nutri-panel').classList.add('hidden');
+    document.getElementById('nutri-rec').classList.add('hidden');
+  }
+
+  function calcularFinanceiro() {
+    const ganhos = parseFloat(document.getElementById('fin-ganhos').value);
+    const custos = parseFloat(document.getElementById('fin-custos').value);
+
+    if (isNaN(ganhos) || isNaN(custos)) {
+      alert('Por favor, preencha os dois campos antes de calcular.');
+      return;
+    }
+
+    const lucro = ganhos - custos;
+
+    document.getElementById('fin-r-ganhos').textContent = BRL(ganhos);
+    document.getElementById('fin-r-custos').textContent = BRL(custos);
+
+    const lucroEl = document.getElementById('fin-r-lucro');
+    lucroEl.textContent = BRL(Math.abs(lucro));
+    lucroEl.className = 'r-val ' + (lucro >= 0 ? 'green' : 'red');
+
+    document.getElementById('fin-resultado').classList.remove('hidden');
+
+    const statusEl = document.getElementById('fin-status');
+    statusEl.className = 'status-badge ' + (lucro >= 0 ? 'success' : 'danger');
+    document.getElementById('fin-status-text').textContent = lucro >= 0 ? '✅ OPERAÇÃO SAUDÁVEL' : '❌ PREJUÍZO';
+    document.getElementById('fin-status-sub').textContent = lucro >= 0
+      ? 'Resultado positivo confirmado.'
+      : 'Reveja os custos e a estratégia de venda.';
+    statusEl.classList.remove('hidden');
+  }
+
+  function calcularPesagem() {
+    const ideal = parseFloat(document.getElementById('pes-ideal').value);
+    const atual = parseFloat(document.getElementById('pes-atual').value);
+    const preco = parseFloat(document.getElementById('pes-preco').value);
+
+    if (isNaN(ideal) || isNaN(atual) || isNaN(preco)) {
+      alert('Por favor, preencha todos os três campos antes de verificar.');
+      return;
+    }
+
+    const statusEl  = document.getElementById('pes-status');
+    const nutriPanel = document.getElementById('nutri-panel');
+    const nutriRec   = document.getElementById('nutri-rec');
+
+    if (atual >= ideal) {
+      statusEl.className = 'status-badge success';
+      document.getElementById('pes-status-text').textContent = '✅ Animal no peso ideal';
+      document.getElementById('pes-status-sub').textContent = `Peso atual (${KG(atual)}) atingiu a meta de ${KG(ideal)}.`;
+      statusEl.classList.remove('hidden');
+      nutriPanel.classList.add('hidden');
+      nutriRec.classList.add('hidden');
+    } else {
+      const CA = 7.0;
+      const defice  = ideal - atual;
+      const racao   = defice * CA;
+      const custo   = racao * preco;
+
+      statusEl.className = 'status-badge warning';
+      document.getElementById('pes-status-text').textContent = '⚠️ Animal abaixo do peso';
+      document.getElementById('pes-status-sub').textContent = `Défice de ${KG(defice)} — nutrição acionada automaticamente.`;
+      statusEl.classList.remove('hidden');
+
+      document.getElementById('nutri-defice').textContent   = KG(defice);
+      document.getElementById('nutri-racao').textContent    = KG(racao);
+      document.getElementById('nutri-preco-kg').textContent = BRL(preco);
+      document.getElementById('nutri-custo').textContent    = BRL(custo);
+
+      nutriPanel.classList.remove('hidden');
+      nutriRec.classList.remove('hidden');
+    }
+  }
+</script>
+</body>
+</html>
