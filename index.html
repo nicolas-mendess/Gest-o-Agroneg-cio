@@ -2,7 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d3318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AgroGestão">
+<meta name="description" content="Sistema de gestão financeira e pesagem para pecuaristas de corte.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Gestão Agronegócios</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -26,28 +33,34 @@
     --radius-sm: 10px;
     --radius-md: 16px;
     --radius-lg: 24px;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
     --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
     --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+    --tab-h: 68px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top:    env(safe-area-inset-top, 0px);
   }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
 
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--gray-100);
     color: var(--gray-900);
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 0;
+    -webkit-font-smoothing: antialiased;
   }
 
   .app {
     width: 100%;
     max-width: 430px;
-    min-height: 100vh;
+    height: 100dvh;
     background: var(--white);
     display: flex;
     flex-direction: column;
@@ -60,74 +73,77 @@
     display: none;
     flex-direction: column;
     flex: 1;
-    animation: fadeIn 0.3s ease;
+    overflow: hidden;
+    animation: fadeSlide 0.28s cubic-bezier(0.4,0,0.2,1);
   }
   .screen.active { display: flex; }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── HOME ── */
+  /* ── SCROLLABLE CONTENT ── */
+  .screen-body {
+    padding: 20px 20px calc(var(--tab-h) + var(--safe-bottom) + 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  .screen-body::-webkit-scrollbar { display: none; }
+
+  /* ── HOME HERO ── */
   .home-hero {
     background: var(--green-900);
-    padding: 56px 28px 44px;
+    padding: calc(var(--safe-top) + 32px) 28px 36px;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .home-hero::before {
     content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 220px; height: 220px;
-    border-radius: 50%;
+    position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
     background: rgba(255,255,255,0.04);
   }
   .home-hero::after {
     content: '';
-    position: absolute;
-    bottom: -30px; left: -30px;
-    width: 140px; height: 140px;
-    border-radius: 50%;
+    position: absolute; bottom: -30px; left: -30px;
+    width: 140px; height: 140px; border-radius: 50%;
     background: rgba(255,255,255,0.03);
   }
   .home-eyebrow {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--green-300);
-    margin-bottom: 12px;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--green-300); margin-bottom: 10px;
   }
   .home-title {
     font-family: 'DM Serif Display', serif;
-    font-size: 36px;
-    line-height: 1.12;
-    color: var(--white);
-    margin-bottom: 10px;
+    font-size: clamp(30px, 8vw, 38px);
+    line-height: 1.1; color: var(--white); margin-bottom: 8px;
   }
   .home-title em { font-style: italic; color: var(--green-300); }
-  .home-sub {
-    font-size: 14px;
-    color: rgba(255,255,255,0.55);
-    line-height: 1.6;
-  }
+  .home-sub { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; }
 
-  .home-body {
-    padding: 28px 24px;
+  .home-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 22px 20px calc(var(--tab-h) + var(--safe-bottom) + 16px);
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    flex: 1;
+    gap: 12px;
   }
-  .home-section-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--gray-400);
-    margin-bottom: 4px;
+  .home-scroll::-webkit-scrollbar { display: none; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gray-400); margin-bottom: 2px;
   }
 
   .module-card {
@@ -135,166 +151,150 @@
     border: 1.5px solid var(--gray-200);
     border-radius: var(--radius-lg);
     padding: 20px 18px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    display: flex; align-items: center; gap: 16px;
     cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-    text-decoration: none;
-    color: inherit;
-    user-select: none;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.12s;
+    user-select: none; touch-action: manipulation;
+    min-height: 80px;
   }
-  .module-card:hover {
-    border-color: var(--green-300);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
-  }
-  .module-card:active { transform: scale(0.985); }
-  .module-card.primary {
-    background: var(--green-700);
-    border-color: var(--green-700);
-  }
+  .module-card:active { transform: scale(0.975); box-shadow: none; }
+  .module-card.primary { background: var(--green-700); border-color: var(--green-700); }
   .module-icon {
-    width: 50px; height: 50px;
-    border-radius: 14px;
+    width: 52px; height: 52px; border-radius: 15px;
     background: var(--green-100);
     display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
+    font-size: 26px; flex-shrink: 0;
   }
   .module-card.primary .module-icon { background: rgba(255,255,255,0.15); }
   .module-info { flex: 1; }
-  .module-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--gray-900);
-    margin-bottom: 3px;
-  }
+  .module-title { font-size: 16px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
   .module-card.primary .module-title { color: var(--white); }
-  .module-desc { font-size: 12px; color: var(--gray-400); }
+  .module-desc { font-size: 12px; color: var(--gray-400); line-height: 1.4; }
   .module-card.primary .module-desc { color: rgba(255,255,255,0.6); }
-  .module-arrow {
-    font-size: 20px;
-    color: var(--gray-200);
-    font-weight: 300;
-  }
+  .module-arrow { font-size: 22px; color: var(--gray-200); }
   .module-card.primary .module-arrow { color: rgba(255,255,255,0.3); }
 
-  .home-footer {
-    padding: 16px 24px 32px;
-    display: flex;
-    gap: 12px;
-  }
+  .stat-row { display: flex; gap: 12px; }
   .stat-pill {
-    flex: 1;
-    background: var(--green-50);
+    flex: 1; background: var(--green-50);
     border: 1px solid var(--green-100);
     border-radius: var(--radius-md);
-    padding: 12px 14px;
-    text-align: center;
+    padding: 14px; text-align: center;
   }
   .stat-val { font-size: 20px; font-weight: 700; color: var(--green-700); }
   .stat-lbl { font-size: 11px; color: var(--green-500); margin-top: 2px; }
 
-  /* ── INNER SCREENS ── */
-  .screen-header {
-    background: var(--green-900);
-    padding: 48px 24px 28px;
+  /* ── TAB BAR ── */
+  .tab-bar {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    height: calc(var(--tab-h) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  }
+  .tab-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; padding: 4px 8px;
+    touch-action: manipulation;
+    transition: opacity 0.15s;
+  }
+  .tab-item:active { opacity: 0.6; }
+  .tab-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
     position: relative;
   }
-  .screen-header.amber { background: var(--amber-600); }
-  .back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.7);
-    cursor: pointer;
-    margin-bottom: 20px;
-    background: none;
-    border: none;
-    padding: 0;
-    transition: color 0.2s;
+  .tab-icon::after {
+    content: '';
+    position: absolute; bottom: -6px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 3px;
+    background: var(--green-700);
+    border-radius: 2px;
+    transition: width 0.2s ease;
   }
-  .back-btn:hover { color: var(--white); }
+  .tab-item.active .tab-icon::after { width: 20px; }
+  .tab-lbl { font-size: 10px; font-weight: 500; color: var(--gray-400); transition: color 0.2s; }
+  .tab-item.active .tab-lbl { color: var(--green-700); font-weight: 600; }
+
+  /* ── INNER SCREEN HEADER ── */
+  .screen-header {
+    background: var(--green-900);
+    padding: calc(var(--safe-top) + 20px) 24px 24px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.1);
+    border: none; border-radius: 20px;
+    padding: 8px 14px; cursor: pointer;
+    margin-bottom: 18px;
+    touch-action: manipulation;
+    transition: background 0.2s;
+    min-height: 44px;
+  }
+  .back-btn:active { background: rgba(255,255,255,0.2); }
   .screen-title {
     font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: var(--white);
-    margin-bottom: 4px;
+    font-size: 26px; color: var(--white); margin-bottom: 4px;
   }
   .screen-sub { font-size: 12px; color: rgba(255,255,255,0.5); }
 
-  .screen-body {
-    padding: 24px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  /* ── FORM ELEMENTS ── */
+  /* ── FORM ── */
   .field-group { display: flex; flex-direction: column; gap: 6px; }
-  .field-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gray-600);
-    letter-spacing: 0.04em;
-  }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--gray-600); letter-spacing: 0.04em; }
   .input-wrap {
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     background: var(--gray-100);
     border: 1.5px solid var(--gray-200);
     border-radius: var(--radius-md);
-    padding: 0 14px;
+    padding: 0 16px;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .input-wrap:focus-within {
     border-color: var(--green-500);
-    box-shadow: 0 0 0 3px rgba(46,139,71,0.1);
+    box-shadow: 0 0 0 3px rgba(46,139,71,0.12);
     background: var(--white);
   }
-  .input-prefix { font-size: 13px; font-weight: 600; color: var(--gray-400); margin-right: 6px; white-space: nowrap; }
+  .input-wrap.error { border-color: var(--red-600); }
+  .input-prefix { font-size: 14px; font-weight: 600; color: var(--gray-400); margin-right: 8px; white-space: nowrap; }
   .input-wrap input {
-    flex: 1;
-    background: none;
-    border: none;
-    outline: none;
+    flex: 1; background: none; border: none; outline: none;
     font-family: 'DM Sans', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--gray-900);
-    padding: 14px 0;
-    width: 100%;
+    font-size: 18px; font-weight: 600; color: var(--gray-900);
+    padding: 15px 0; width: 100%;
+    min-height: 54px;
   }
-  .input-wrap input::placeholder { color: var(--gray-400); font-weight: 400; font-size: 15px; }
-  .input-suffix { font-size: 13px; color: var(--gray-400); margin-left: 6px; }
+  .input-wrap input::placeholder { color: var(--gray-400); font-weight: 400; font-size: 16px; }
+  .input-suffix { font-size: 14px; color: var(--gray-400); margin-left: 8px; font-weight: 500; }
+  .field-error { font-size: 11px; color: var(--red-600); font-weight: 500; display: none; }
+  .field-error.visible { display: block; }
 
   .cta-btn {
-    background: var(--green-700);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius-md);
-    padding: 17px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    width: 100%;
-    cursor: pointer;
-    letter-spacing: 0.02em;
-    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    background: var(--green-700); color: var(--white);
+    border: none; border-radius: var(--radius-md);
+    padding: 18px; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; width: 100%;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: background 0.2s, transform 0.1s;
     box-shadow: 0 4px 14px rgba(26,92,42,0.3);
+    min-height: 56px; touch-action: manipulation;
   }
-  .cta-btn:hover { background: var(--green-500); box-shadow: 0 6px 20px rgba(26,92,42,0.35); }
-  .cta-btn:active { transform: scale(0.98); }
-  .cta-btn.amber-btn {
-    background: var(--amber-600);
-    box-shadow: 0 4px 14px rgba(180,83,9,0.3);
-  }
-  .cta-btn.amber-btn:hover { background: #92400e; }
+  .cta-btn:active { transform: scale(0.97); background: var(--green-500); }
 
   /* ── RESULTS ── */
   .result-panel {
@@ -302,24 +302,18 @@
     border: 1.5px solid var(--gray-200);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    animation: fadeIn 0.35s ease;
   }
   .result-panel.hidden { display: none; }
   .result-panel-header {
     padding: 12px 16px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    background: var(--gray-100);
-    color: var(--gray-600);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--gray-100); color: var(--gray-600);
     border-bottom: 1px solid var(--gray-200);
   }
   .result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 13px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px;
     border-bottom: 1px solid var(--gray-200);
     font-size: 14px;
   }
@@ -327,25 +321,17 @@
   .result-row .r-lbl { color: var(--gray-600); }
   .result-row .r-val { font-weight: 700; color: var(--gray-900); }
   .result-row .r-val.green { color: var(--green-500); font-size: 20px; }
-  .result-row .r-val.red { color: var(--red-600); font-size: 20px; }
+  .result-row .r-val.red   { color: var(--red-600);   font-size: 20px; }
 
   .status-badge {
-    border-radius: var(--radius-md);
-    padding: 16px 18px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: fadeIn 0.4s ease;
+    border-radius: var(--radius-md); padding: 16px 18px;
+    display: flex; align-items: center; gap: 12px;
   }
   .status-badge.hidden { display: none; }
   .status-badge.success { background: var(--green-100); border: 2px solid var(--green-500); }
   .status-badge.danger  { background: var(--red-100);   border: 2px solid var(--red-600); }
   .status-badge.warning { background: var(--amber-100); border: 2px solid var(--amber-600); }
-  .badge-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .badge-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
   .success .badge-dot { background: var(--green-500); box-shadow: 0 0 0 4px rgba(46,139,71,0.2); }
   .danger  .badge-dot { background: var(--red-600);   box-shadow: 0 0 0 4px rgba(220,38,38,0.2); }
   .warning .badge-dot { background: var(--amber-600); box-shadow: 0 0 0 4px rgba(180,83,9,0.2); }
@@ -355,39 +341,22 @@
   .warning .badge-text { color: var(--amber-600); }
   .badge-sub { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
 
-  .nutri-block {
-    background: var(--green-900);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    animation: fadeIn 0.4s ease;
-  }
+  .nutri-block { background: var(--green-900); border-radius: var(--radius-lg); overflow: hidden; }
   .nutri-block.hidden { display: none; }
   .nutri-block-header {
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    padding: 14px 18px; display: flex; align-items: center; gap: 10px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
   }
   .nutri-block-title { font-size: 13px; font-weight: 700; color: var(--white); letter-spacing: 0.06em; text-transform: uppercase; }
   .nutri-tag {
     margin-left: auto;
-    background: rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.9);
-    font-size: 10px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 20px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9);
+    font-size: 10px; font-weight: 600; padding: 3px 8px;
+    border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase;
   }
   .nutri-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    font-size: 13px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 18px; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 13px;
   }
   .nutri-row:last-child { border-bottom: none; }
   .nutri-row .nl { color: rgba(255,255,255,0.6); }
@@ -395,43 +364,63 @@
   .nutri-row .nv.big { font-size: 20px; color: var(--green-300); }
 
   .rec-card {
-    background: var(--gray-100);
-    border-radius: var(--radius-md);
-    padding: 14px 16px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
+    background: var(--gray-100); border-radius: var(--radius-md);
+    padding: 14px 16px; display: flex; gap: 10px; align-items: flex-start;
   }
+  .rec-card.hidden { display: none; }
   .rec-icon { font-size: 18px; flex-shrink: 0; }
   .rec-text { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
   .rec-text strong { color: var(--gray-900); }
 
-  .divider { height: 1px; background: var(--gray-200); }
-
-  /* ── SCROLLBAR ── */
-  .screen-body::-webkit-scrollbar { width: 4px; }
-  .screen-body::-webkit-scrollbar-track { background: transparent; }
-  .screen-body::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    background: var(--green-900);
+    color: var(--white);
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px;
+    border-radius: var(--radius-md);
+    margin-bottom: 4px;
+  }
+  .install-banner.hidden { display: none; }
+  .install-btn {
+    margin-left: auto; flex-shrink: 0;
+    background: var(--green-300); color: var(--green-900);
+    border: none; border-radius: var(--radius-sm);
+    padding: 8px 14px; font-size: 12px; font-weight: 700;
+    cursor: pointer; touch-action: manipulation;
+  }
+  .install-close {
+    background: none; border: none;
+    color: rgba(255,255,255,0.5); font-size: 18px;
+    cursor: pointer; padding: 0 0 0 8px; line-height: 1;
+  }
 
   @media (min-width: 430px) {
-    body { padding: 24px 0; align-items: center; min-height: 100vh; }
-    .app { border-radius: 32px; min-height: auto; max-height: 90vh; box-shadow: var(--shadow-lg); overflow: hidden; }
-    .screen { max-height: 90vh; overflow-y: auto; }
+    body { align-items: center; min-height: 100vh; padding: 24px 0; }
+    .app { border-radius: 36px; height: 88vh; max-height: 900px; box-shadow: var(--shadow-lg); }
+    .tab-bar { position: absolute; border-radius: 0 0 36px 36px; }
   }
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+  <!-- ═══════════════════════════ HOME ══════════════════════════════════ -->
   <div class="screen active" id="screen-home">
     <div class="home-hero">
       <div class="home-eyebrow">🌾 Sistema de Gestão Rural</div>
       <h1 class="home-title">Gestão<br><em>Agronegócios</em></h1>
       <p class="home-sub">Pecuária de corte · Safra 2025</p>
     </div>
-    <div class="home-body">
-      <p class="home-section-label">Módulos</p>
+    <div class="home-scroll">
+      <div class="install-banner hidden" id="install-banner">
+        <span>📲</span>
+        <span>Instalar o app no seu dispositivo</span>
+        <button class="install-btn" id="install-btn">Instalar</button>
+        <button class="install-close" id="install-close">✕</button>
+      </div>
+      <p class="section-label">Módulos</p>
       <div class="module-card primary" onclick="navigate('financeiro')">
         <div class="module-icon">💰</div>
         <div class="module-info">
@@ -448,15 +437,15 @@
         </div>
         <div class="module-arrow">›</div>
       </div>
-    </div>
-    <div class="home-footer">
-      <div class="stat-pill">
-        <div class="stat-val">CA</div>
-        <div class="stat-lbl">Conv. Alimentar 7,0</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-val">v1.0</div>
-        <div class="stat-lbl">Versão do sistema</div>
+      <div class="stat-row">
+        <div class="stat-pill">
+          <div class="stat-val">CA</div>
+          <div class="stat-lbl">Conv. Alimentar 7,0</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-val">v2.0</div>
+          <div class="stat-lbl">Versão PWA</div>
+        </div>
       </div>
     </div>
   </div>
@@ -472,18 +461,20 @@
 
       <div class="field-group">
         <label class="field-label">📈 Ganhos Totais</label>
-        <div class="input-wrap">
+        <div class="input-wrap" id="wrap-ganhos">
           <span class="input-prefix">R$</span>
-          <input type="number" id="fin-ganhos" placeholder="0,00" min="0" step="0.01">
+          <input type="number" id="fin-ganhos" placeholder="0,00" min="0" step="0.01" inputmode="decimal">
         </div>
+        <span class="field-error" id="err-ganhos">Informe um valor válido maior que zero.</span>
       </div>
 
       <div class="field-group">
         <label class="field-label">📉 Custos Totais</label>
-        <div class="input-wrap">
+        <div class="input-wrap" id="wrap-custos">
           <span class="input-prefix">R$</span>
-          <input type="number" id="fin-custos" placeholder="0,00" min="0" step="0.01">
+          <input type="number" id="fin-custos" placeholder="0,00" min="0" step="0.01" inputmode="decimal">
         </div>
+        <span class="field-error" id="err-custos">Informe um valor válido maior que zero.</span>
       </div>
 
       <button class="cta-btn" onclick="calcularFinanceiro()">Calcular Resultado</button>
@@ -508,7 +499,7 @@
         <div class="badge-dot"></div>
         <div>
           <div class="badge-text" id="fin-status-text"></div>
-          <div class="badge-sub" id="fin-status-sub"></div>
+          <div class="badge-sub"  id="fin-status-sub"></div>
         </div>
       </div>
 
@@ -526,26 +517,29 @@
 
       <div class="field-group">
         <label class="field-label">🎯 Peso Ideal / Meta</label>
-        <div class="input-wrap">
-          <input type="number" id="pes-ideal" placeholder="450" min="0" step="0.1">
+        <div class="input-wrap" id="wrap-ideal">
+          <input type="number" id="pes-ideal" placeholder="450" min="0" step="0.1" inputmode="decimal">
           <span class="input-suffix">kg</span>
         </div>
+        <span class="field-error" id="err-ideal">Informe o peso ideal em kg.</span>
       </div>
 
       <div class="field-group">
         <label class="field-label">⚖️ Peso Atual na Balança</label>
-        <div class="input-wrap">
-          <input type="number" id="pes-atual" placeholder="380" min="0" step="0.1">
+        <div class="input-wrap" id="wrap-atual">
+          <input type="number" id="pes-atual" placeholder="380" min="0" step="0.1" inputmode="decimal">
           <span class="input-suffix">kg</span>
         </div>
+        <span class="field-error" id="err-atual">Informe o peso atual em kg.</span>
       </div>
 
       <div class="field-group">
         <label class="field-label">🌽 Preço do KG de Ração</label>
-        <div class="input-wrap">
+        <div class="input-wrap" id="wrap-preco">
           <span class="input-prefix">R$</span>
-          <input type="number" id="pes-preco" placeholder="3,50" min="0" step="0.01">
+          <input type="number" id="pes-preco" placeholder="3,50" min="0" step="0.01" inputmode="decimal">
         </div>
+        <span class="field-error" id="err-preco">Informe o preço do kg de ração.</span>
       </div>
 
       <button class="cta-btn" onclick="calcularPesagem()">Verificar Peso</button>
@@ -554,7 +548,7 @@
         <div class="badge-dot"></div>
         <div>
           <div class="badge-text" id="pes-status-text"></div>
-          <div class="badge-sub" id="pes-status-sub"></div>
+          <div class="badge-sub"  id="pes-status-sub"></div>
         </div>
       </div>
 
@@ -564,26 +558,11 @@
           <span class="nutri-block-title">Plano de Nutrição</span>
           <span class="nutri-tag">Automático</span>
         </div>
-        <div class="nutri-row">
-          <span class="nl">Défice de peso</span>
-          <span class="nv" id="nutri-defice">—</span>
-        </div>
-        <div class="nutri-row">
-          <span class="nl">Conversão Alimentar (CA)</span>
-          <span class="nv">7,0</span>
-        </div>
-        <div class="nutri-row">
-          <span class="nl">KG de ração necessário</span>
-          <span class="nv" id="nutri-racao">—</span>
-        </div>
-        <div class="nutri-row">
-          <span class="nl">Preço por KG</span>
-          <span class="nv" id="nutri-preco-kg">—</span>
-        </div>
-        <div class="nutri-row">
-          <span class="nl">Custo total estimado</span>
-          <span class="nv big" id="nutri-custo">—</span>
-        </div>
+        <div class="nutri-row"><span class="nl">Défice de peso</span><span class="nv" id="nutri-defice">—</span></div>
+        <div class="nutri-row"><span class="nl">Conversão Alimentar (CA)</span><span class="nv">7,0</span></div>
+        <div class="nutri-row"><span class="nl">KG de ração necessário</span><span class="nv" id="nutri-racao">—</span></div>
+        <div class="nutri-row"><span class="nl">Preço por KG</span><span class="nv" id="nutri-preco-kg">—</span></div>
+        <div class="nutri-row"><span class="nl">Custo total estimado</span><span class="nv big" id="nutri-custo">—</span></div>
       </div>
 
       <div class="rec-card hidden" id="nutri-rec">
@@ -596,6 +575,22 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════ TAB BAR ══════════════════════════════ -->
+  <nav class="tab-bar" id="tab-bar">
+    <div class="tab-item active" id="tab-home" onclick="navigate('home')">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-lbl">Início</div>
+    </div>
+    <div class="tab-item" id="tab-financeiro" onclick="navigate('financeiro')">
+      <div class="tab-icon">💰</div>
+      <div class="tab-lbl">Financeiro</div>
+    </div>
+    <div class="tab-item" id="tab-pesagem" onclick="navigate('pesagem')">
+      <div class="tab-icon">⚖️</div>
+      <div class="tab-lbl">Pesagem</div>
+    </div>
+  </nav>
+
 </div>
 
 <script>
@@ -605,93 +600,164 @@
   function navigate(to) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-' + to).classList.add('active');
-    if (to === 'home') { resetFinanceiro(); resetPesagem(); }
-    window.scrollTo(0, 0);
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    const tab = document.getElementById('tab-' + to);
+    if (tab) tab.classList.add('active');
+    document.querySelector('#screen-' + to + ' .screen-body, #screen-' + to + ' .home-scroll')?.scrollTo(0, 0);
+    saveState(to);
   }
 
-  function resetFinanceiro() {
-    ['fin-ganhos', 'fin-custos'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('fin-resultado').classList.add('hidden');
-    document.getElementById('fin-status').classList.add('hidden');
+  function saveState(screen) {
+    try { localStorage.setItem('agro_last_screen', screen); } catch(e) {}
   }
 
-  function resetPesagem() {
-    ['pes-ideal', 'pes-atual', 'pes-preco'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('pes-status').classList.add('hidden');
-    document.getElementById('nutri-panel').classList.add('hidden');
-    document.getElementById('nutri-rec').classList.add('hidden');
+  function loadLastScreen() {
+    try {
+      const hash = location.hash.replace('#', '');
+      const stored = localStorage.getItem('agro_last_screen');
+      const target = ['financeiro', 'pesagem'].includes(hash) ? hash
+                   : ['financeiro', 'pesagem'].includes(stored) ? stored
+                   : 'home';
+      if (target !== 'home') navigate(target);
+    } catch(e) {}
+  }
+
+  function showError(wrapId, errId, show) {
+    document.getElementById(wrapId).classList.toggle('error', show);
+    document.getElementById(errId).classList.toggle('visible', show);
+  }
+
+  function clearErrors(...ids) {
+    ids.forEach(([w, e]) => showError(w, e, false));
   }
 
   function calcularFinanceiro() {
     const ganhos = parseFloat(document.getElementById('fin-ganhos').value);
     const custos = parseFloat(document.getElementById('fin-custos').value);
+    let valid = true;
 
-    if (isNaN(ganhos) || isNaN(custos)) {
-      alert('Por favor, preencha os dois campos antes de calcular.');
-      return;
-    }
+    clearErrors(['wrap-ganhos','err-ganhos'], ['wrap-custos','err-custos']);
+
+    if (isNaN(ganhos) || ganhos < 0) { showError('wrap-ganhos', 'err-ganhos', true); valid = false; }
+    if (isNaN(custos) || custos < 0) { showError('wrap-custos', 'err-custos', true); valid = false; }
+    if (!valid) return;
 
     const lucro = ganhos - custos;
-
     document.getElementById('fin-r-ganhos').textContent = BRL(ganhos);
     document.getElementById('fin-r-custos').textContent = BRL(custos);
-
-    const lucroEl = document.getElementById('fin-r-lucro');
-    lucroEl.textContent = BRL(Math.abs(lucro));
-    lucroEl.className = 'r-val ' + (lucro >= 0 ? 'green' : 'red');
-
+    const el = document.getElementById('fin-r-lucro');
+    el.textContent = BRL(Math.abs(lucro));
+    el.className = 'r-val ' + (lucro >= 0 ? 'green' : 'red');
     document.getElementById('fin-resultado').classList.remove('hidden');
 
-    const statusEl = document.getElementById('fin-status');
-    statusEl.className = 'status-badge ' + (lucro >= 0 ? 'success' : 'danger');
+    const s = document.getElementById('fin-status');
+    s.className = 'status-badge ' + (lucro >= 0 ? 'success' : 'danger');
     document.getElementById('fin-status-text').textContent = lucro >= 0 ? '✅ OPERAÇÃO SAUDÁVEL' : '❌ PREJUÍZO';
-    document.getElementById('fin-status-sub').textContent = lucro >= 0
+    document.getElementById('fin-status-sub').textContent  = lucro >= 0
       ? 'Resultado positivo confirmado.'
       : 'Reveja os custos e a estratégia de venda.';
-    statusEl.classList.remove('hidden');
+    s.classList.remove('hidden');
+
+    try {
+      localStorage.setItem('agro_fin_ganhos', ganhos);
+      localStorage.setItem('agro_fin_custos', custos);
+    } catch(e) {}
   }
 
   function calcularPesagem() {
     const ideal = parseFloat(document.getElementById('pes-ideal').value);
     const atual = parseFloat(document.getElementById('pes-atual').value);
     const preco = parseFloat(document.getElementById('pes-preco').value);
+    let valid = true;
 
-    if (isNaN(ideal) || isNaN(atual) || isNaN(preco)) {
-      alert('Por favor, preencha todos os três campos antes de verificar.');
-      return;
-    }
+    clearErrors(['wrap-ideal','err-ideal'], ['wrap-atual','err-atual'], ['wrap-preco','err-preco']);
 
-    const statusEl  = document.getElementById('pes-status');
-    const nutriPanel = document.getElementById('nutri-panel');
-    const nutriRec   = document.getElementById('nutri-rec');
+    if (isNaN(ideal) || ideal <= 0) { showError('wrap-ideal', 'err-ideal', true); valid = false; }
+    if (isNaN(atual) || atual <= 0) { showError('wrap-atual', 'err-atual', true); valid = false; }
+    if (isNaN(preco) || preco <= 0) { showError('wrap-preco', 'err-preco', true); valid = false; }
+    if (!valid) return;
+
+    const nutri = document.getElementById('nutri-panel');
+    const rec   = document.getElementById('nutri-rec');
+    const s     = document.getElementById('pes-status');
 
     if (atual >= ideal) {
-      statusEl.className = 'status-badge success';
+      s.className = 'status-badge success';
       document.getElementById('pes-status-text').textContent = '✅ Animal no peso ideal';
-      document.getElementById('pes-status-sub').textContent = `Peso atual (${KG(atual)}) atingiu a meta de ${KG(ideal)}.`;
-      statusEl.classList.remove('hidden');
-      nutriPanel.classList.add('hidden');
-      nutriRec.classList.add('hidden');
+      document.getElementById('pes-status-sub').textContent  = `Peso atual (${KG(atual)}) atingiu a meta de ${KG(ideal)}.`;
+      s.classList.remove('hidden');
+      nutri.classList.add('hidden');
+      rec.classList.add('hidden');
     } else {
-      const CA = 7.0;
-      const defice  = ideal - atual;
-      const racao   = defice * CA;
-      const custo   = racao * preco;
+      const CA     = 7.0;
+      const defice = ideal - atual;
+      const racao  = defice * CA;
+      const custo  = racao * preco;
 
-      statusEl.className = 'status-badge warning';
+      s.className = 'status-badge warning';
       document.getElementById('pes-status-text').textContent = '⚠️ Animal abaixo do peso';
-      document.getElementById('pes-status-sub').textContent = `Défice de ${KG(defice)} — nutrição acionada automaticamente.`;
-      statusEl.classList.remove('hidden');
+      document.getElementById('pes-status-sub').textContent  = `Défice de ${KG(defice)} — nutrição acionada automaticamente.`;
+      s.classList.remove('hidden');
 
-      document.getElementById('nutri-defice').textContent   = KG(defice);
-      document.getElementById('nutri-racao').textContent    = KG(racao);
-      document.getElementById('nutri-preco-kg').textContent = BRL(preco);
-      document.getElementById('nutri-custo').textContent    = BRL(custo);
-
-      nutriPanel.classList.remove('hidden');
-      nutriRec.classList.remove('hidden');
+      document.getElementById('nutri-defice').textContent    = KG(defice);
+      document.getElementById('nutri-racao').textContent     = KG(racao);
+      document.getElementById('nutri-preco-kg').textContent  = BRL(preco);
+      document.getElementById('nutri-custo').textContent     = BRL(custo);
+      nutri.classList.remove('hidden');
+      rec.classList.remove('hidden');
     }
+
+    try {
+      localStorage.setItem('agro_pes_ideal', ideal);
+      localStorage.setItem('agro_pes_atual', atual);
+      localStorage.setItem('agro_pes_preco', preco);
+    } catch(e) {}
   }
+
+  function restoreInputs() {
+    try {
+      const map = {
+        'fin-ganhos': 'agro_fin_ganhos',
+        'fin-custos': 'agro_fin_custos',
+        'pes-ideal':  'agro_pes_ideal',
+        'pes-atual':  'agro_pes_atual',
+        'pes-preco':  'agro_pes_preco',
+      };
+      Object.entries(map).forEach(([id, key]) => {
+        const v = localStorage.getItem(key);
+        if (v) document.getElementById(id).value = v;
+      });
+    } catch(e) {}
+  }
+
+  // PWA install prompt
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('install-banner').classList.remove('hidden');
+  });
+  document.getElementById('install-btn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('install-banner').classList.add('hidden');
+  });
+  document.getElementById('install-close').addEventListener('click', () => {
+    document.getElementById('install-banner').classList.add('hidden');
+  });
+
+  // Service Worker registration
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    });
+  }
+
+  // Boot
+  restoreInputs();
+  loadLastScreen();
 </script>
 </body>
 </html>
