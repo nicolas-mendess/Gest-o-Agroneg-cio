@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d3318">
+<title>AgroGestão v4.0</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g9:#0d3318;--g7:#1a5c2a;--g5:#2e8b47;--g3:#6dbf82;--g1:#e8f5ec;--g0:#f4fbf6;
+  --a6:#b45309;--a1:#fef3c7;--r6:#dc2626;--r1:#fee2e2;--b6:#1d4ed8;--b1:#dbeafe;
+  --n9:#111827;--n7:#374151;--n6:#4b5563;--n4:#9ca3af;--n2:#e5e7eb;--n1:#f3f4f6;--w:#fff;
+  --rsm:10px;--rmd:16px;--rlg:24px;
+  --tab:64px;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:'DM Sans',sans-serif;background:var(--n1);color:var(--n9);display:flex;justify-content:center;align-items:flex-start;-webkit-font-smoothing:antialiased}
+.app{width:100%;max-width:430px;height:100dvh;background:var(--w);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;animation:fs .25s cubic-bezier(.4,0,.2,1)}
+.screen.active{display:flex}
+@keyframes fs{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sbody{padding:14px 14px calc(var(--tab) + var(--sb) + 14px);display:flex;flex-direction:column;gap:12px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.sbody::-webkit-scrollbar{display:none}
+
+/* HERO */
+.hero{background:var(--g9);padding:calc(var(--st)+24px) 20px 22px;position:relative;overflow:hidden;flex-shrink:0}
+.hero::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.04)}
+.eyebrow{font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--g3);margin-bottom:6px}
+.htitle{font-family:'DM Serif Display',serif;font-size:clamp(24px,6vw,30px);line-height:1.1;color:var(--w);margin-bottom:4px}
+.htitle em{font-style:italic;color:var(--g3)}
+.hsub{font-size:11px;color:rgba(255,255,255,.5);line-height:1.5}
+.farm-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 11px;margin-top:8px;font-size:11px;color:rgba(255,255,255,.8);cursor:pointer;transition:background .2s}
+.farm-badge:active{background:rgba(255,255,255,.2)}
+
+/* ALERT STRIP */
+.alert-strip{display:flex;flex-direction:column;gap:6px}
+.alert-item{display:flex;align-items:center;gap:8px;background:var(--a1);border:1px solid var(--a6);border-radius:var(--rmd);padding:10px 12px;cursor:pointer;transition:opacity .15s}
+.alert-item.green{background:var(--g0);border-color:var(--g3)}
+.alert-item.red{background:var(--r1);border-color:var(--r6)}
+.alert-item:active{opacity:.7}
+.alert-dot{width:8px;height:8px;border-radius:50%;background:var(--a6);flex-shrink:0}
+.alert-item.green .alert-dot{background:var(--g5)}
+.alert-item.red .alert-dot{background:var(--r6)}
+.alert-txt{font-size:12px;font-weight:600;color:var(--a6);flex:1}
+.alert-item.green .alert-txt{color:var(--g7)}
+.alert-item.red .alert-txt{color:var(--r6)}
+.alert-date{font-size:10px;color:var(--n4)}
+
+/* HOME SCROLL */
+.hscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(var(--tab)+var(--sb)+14px);display:flex;flex-direction:column;gap:10px}
+.hscroll::-webkit-scrollbar{display:none}
+.slabel{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--n4);margin-bottom:2px}
+
+.mcard{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--rlg);padding:15px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s,transform .12s;user-select:none;touch-action:manipulation;min-height:68px}
+.mcard:active{transform:scale(.975)}
+.mcard.primary{background:var(--g7);border-color:var(--g7)}
+.mcard.blue{background:#1e40af;border-color:#1e40af}
+.mico{width:44px;height:44px;border-radius:13px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.mcard.primary .mico,.mcard.blue .mico{background:rgba(255,255,255,.15)}
+.minfo{flex:1}
+.mtitle{font-size:14px;font-weight:600;color:var(--n9);margin-bottom:2px}
+.mcard.primary .mtitle,.mcard.blue .mtitle{color:var(--w)}
+.mdesc{font-size:11px;color:var(--n4);line-height:1.4}
+.mcard.primary .mdesc,.mcard.blue .mdesc{color:rgba(255,255,255,.6)}
+.marr{font-size:18px;color:var(--n2)}
+.mcard.primary .marr,.mcard.blue .marr{color:rgba(255,255,255,.3)}
+
+/* GRID 2 COL */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcard-sm{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--rmd);padding:14px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer;transition:border-color .2s,transform .12s;user-select:none;touch-action:manipulation}
+.mcard-sm:active{transform:scale(.975)}
+.mcard-sm .mico-sm{width:36px;height:36px;border-radius:10px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:18px}
+.mcard-sm.amber .mico-sm{background:var(--a1)}
+.mcard-sm.blue .mico-sm{background:var(--b1)}
+.mcard-sm.red .mico-sm{background:var(--r1)}
+.mcard-sm .sm-title{font-size:13px;font-weight:600;color:var(--n9)}
+.mcard-sm .sm-desc{font-size:10px;color:var(--n4)}
+
+/* STAT */
+.strow{display:flex;gap:8px}
+.stpill{flex:1;background:var(--g0);border:1px solid var(--g1);border-radius:var(--rmd);padding:10px 12px;text-align:center}
+.stval{font-size:17px;font-weight:700;color:var(--g7)}
+.stlbl{font-size:10px;color:var(--g5);margin-top:2px}
+
+/* TAB BAR */
+.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--tab)+var(--sb));padding-bottom:var(--sb);background:rgba(255,255,255,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--n2);display:flex;align-items:flex-start;padding-top:8px;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.06)}
+.titem{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:3px 4px;touch-action:manipulation;transition:opacity .15s}
+.titem:active{opacity:.6}
+.tico{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative}
+.tico::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:3px;background:var(--g7);border-radius:2px;transition:width .2s ease}
+.titem.active .tico::after{width:16px}
+.tlbl{font-size:9px;font-weight:500;color:var(--n4);transition:color .2s}
+.titem.active .tlbl{color:var(--g7);font-weight:600}
+
+/* SCREEN HEADER */
+.shdr{background:var(--g9);padding:calc(var(--st)+16px) 18px 18px;flex-shrink:0}
+.backbtn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:rgba(255,255,255,.7);background:rgba(255,255,255,.1);border:none;border-radius:20px;padding:6px 12px;cursor:pointer;margin-bottom:12px;touch-action:manipulation;min-height:38px;transition:background .2s}
+.backbtn:active{background:rgba(255,255,255,.2)}
+.stitle{font-family:'DM Serif Display',serif;font-size:22px;color:var(--w);margin-bottom:3px}
+.ssub{font-size:11px;color:rgba(255,255,255,.5)}
+
+/* FORM */
+.fgrp{display:flex;flex-direction:column;gap:5px}
+.flbl{font-size:11px;font-weight:600;color:var(--n6);letter-spacing:.04em}
+.iwrap{display:flex;align-items:center;background:var(--n1);border:1.5px solid var(--n2);border-radius:var(--rmd);padding:0 12px;transition:border-color .2s,box-shadow .2s}
+.iwrap:focus-within{border-color:var(--g5);box-shadow:0 0 0 3px rgba(46,139,71,.12);background:var(--w)}
+.iwrap.error{border-color:var(--r6)}
+.ipfx{font-size:12px;font-weight:600;color:var(--n4);margin-right:6px;white-space:nowrap}
+.iwrap input,.iwrap select,.iwrap textarea{flex:1;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--n9);padding:12px 0;width:100%;min-height:46px}
+.iwrap input::placeholder,.iwrap textarea::placeholder{color:var(--n4);font-weight:400;font-size:14px}
+.iwrap textarea{resize:none;min-height:80px;padding:10px 0;font-size:14px;font-weight:400}
+.iwrap select{font-weight:500;font-size:14px;cursor:pointer}
+.isfx{font-size:12px;color:var(--n4);margin-left:6px;font-weight:500}
+.ferr{font-size:10px;color:var(--r6);font-weight:500;display:none}
+.ferr.visible{display:block}
+
+/* COST LINES */
+.cost-lines{display:flex;flex-direction:column;gap:7px}
+.cost-line{display:flex;gap:7px;align-items:center}
+.cost-line .iwrap{flex:1}
+.cost-line input.cname{font-size:13px;font-weight:500;padding:10px 0;min-height:42px}
+.cost-line input.cval{font-size:15px;font-weight:600;padding:10px 0;min-height:42px}
+.delbtn{width:34px;height:42px;display:flex;align-items:center;justify-content:center;background:var(--r1);border:1px solid #fca5a5;border-radius:var(--rsm);cursor:pointer;flex-shrink:0;color:var(--r6);font-size:16px}
+.addbtn{display:flex;align-items:center;justify-content:center;gap:5px;background:var(--g0);border:1.5px dashed var(--g3);border-radius:var(--rmd);padding:9px;color:var(--g7);font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.addbtn:active{background:var(--g1)}
+
+.ctabtn{background:var(--g7);color:var(--w);border:none;border-radius:var(--rmd);padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;width:100%;cursor:pointer;letter-spacing:.02em;transition:background .2s,transform .1s;box-shadow:0 4px 14px rgba(26,92,42,.3);min-height:48px;touch-action:manipulation}
+.ctabtn:active{transform:scale(.97);background:var(--g5)}
+.ctabtn.blue{background:#1e40af;box-shadow:0 4px 14px rgba(30,64,175,.3)}
+.ctabtn.blue:active{background:#1d4ed8}
+
+/* RESULTS */
+.rpanel{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--rlg);overflow:hidden}
+.rpanel.hidden{display:none}
+.rphdr{padding:10px 14px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--n1);color:var(--n6);border-bottom:1px solid var(--n2)}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--n2);font-size:13px}
+.rrow:last-child{border-bottom:none}
+.rrow .rl{color:var(--n6)}
+.rrow .rv{font-weight:700;color:var(--n9)}
+.rrow .rv.grn{color:var(--g5);font-size:17px}
+.rrow .rv.red{color:var(--r6);font-size:17px}
+
+/* PE CARD */
+.pe-card{background:var(--g9);border-radius:var(--rlg);overflow:hidden}
+.pe-card.hidden{display:none}
+.pe-hdr{padding:11px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.pe-title{font-size:11px;font-weight:700;color:var(--w);letter-spacing:.06em;text-transform:uppercase}
+.pe-tag{margin-left:auto;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
+.pe-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.07);font-size:12px}
+.pe-row:last-child{border-bottom:none}
+.pe-row .pl{color:rgba(255,255,255,.6)}
+.pe-row .pv{font-weight:700;color:var(--w)}
+.pe-row .pv.big{font-size:17px;color:var(--g3)}
+.pe-live{font-size:9px;color:rgba(255,255,255,.35);font-style:italic}
+
+/* STATUS BADGE */
+.sbadge{border-radius:var(--rmd);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.sbadge.hidden{display:none}
+.sbadge.success{background:var(--g1);border:2px solid var(--g5)}
+.sbadge.danger{background:var(--r1);border:2px solid var(--r6)}
+.sbadge.warning{background:var(--a1);border:2px solid var(--a6)}
+.bdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.success .bdot{background:var(--g5)}
+.danger .bdot{background:var(--r6)}
+.warning .bdot{background:var(--a6)}
+.btxt{font-size:13px;font-weight:700}
+.success .btxt{color:var(--g7)}
+.danger .btxt{color:var(--r6)}
+.warning .btxt{color:var(--a6)}
+.bsub{font-size:11px;color:var(--n6);margin-top:2px}
+
+/* NUTRI */
+.nblock{background:var(--g9);border-radius:var(--rlg);overflow:hidden}
+.nblock.hidden{display:none}
+.nhdr{padding:11px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.ntitle{font-size:11px;font-weight:700;color:var(--w);letter-spacing:.06em;text-transform:uppercase}
+.ntag{margin-left:auto;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
+.nrow{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.07);font-size:12px}
+.nrow:last-child{border-bottom:none}
+.nrow .nl{color:rgba(255,255,255,.6)}
+.nrow .nv{font-weight:700;color:var(--w)}
+.nrow .nv.big{font-size:17px;color:var(--g3)}
+
+.reccard{background:var(--n1);border-radius:var(--rmd);padding:10px 12px;display:flex;gap:8px;align-items:flex-start}
+.reccard.hidden{display:none}
+.rectxt{font-size:11px;color:var(--n6);line-height:1.6}
+.rectxt strong{color:var(--n9)}
+
+/* HIST */
+.hist-card{background:var(--n1);border-radius:var(--rmd);padding:11px 13px;cursor:pointer;transition:background .15s}
+.hist-card:active{background:var(--n2)}
+.hist-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.hist-type{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--n4)}
+.hist-date{font-size:10px;color:var(--n4)}
+.hist-val{font-size:13px;font-weight:700}
+.hist-sub{font-size:11px;color:var(--n6);margin-top:1px}
+.hist-empty{font-size:12px;color:var(--n4);text-align:center;padding:16px 0}
+
+/* ══ CALENDÁRIO ══ */
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+.cal-month{font-family:'DM Serif Display',serif;font-size:18px;color:var(--n9)}
+.cal-nav{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--n1);border:1px solid var(--n2);border-radius:var(--rsm);cursor:pointer;font-size:18px;color:var(--n6)}
+.cal-nav:active{background:var(--n2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:10px;font-weight:600;color:var(--n4);text-align:center;padding:6px 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:var(--rsm);font-size:13px;font-weight:500;cursor:pointer;position:relative;transition:background .15s}
+.cal-day:active{opacity:.7}
+.cal-day.other-month{color:var(--n4)}
+.cal-day.today{background:var(--g1);color:var(--g7);font-weight:700}
+.cal-day.selected{background:var(--g7);color:var(--w);font-weight:700}
+.cal-day.has-event::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--a6)}
+.cal-day.selected.has-event::after{background:var(--g3)}
+
+.event-list{display:flex;flex-direction:column;gap:8px}
+.event-item{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;background:var(--n1);border-radius:var(--rmd);border-left:3px solid var(--g5)}
+.event-item.sanitario{border-left-color:var(--r6)}
+.event-item.pesagem{border-left-color:var(--b6)}
+.event-item.financeiro{border-left-color:var(--a6)}
+.event-meta{flex:1}
+.event-title{font-size:13px;font-weight:600;color:var(--n9)}
+.event-sub{font-size:11px;color:var(--n4);margin-top:2px}
+.event-badge{font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em}
+.ev-san{background:var(--r1);color:var(--r6)}
+.ev-pes{background:var(--b1);color:var(--b6)}
+.ev-fin{background:var(--a1);color:var(--a6)}
+.ev-gen{background:var(--g1);color:var(--g7)}
+
+.add-event-form{display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--g0);border:1px solid var(--g1);border-radius:var(--rmd)}
+.add-event-form.hidden{display:none}
+
+/* ══ CALCULADORA ══ */
+.calc-wrap{display:flex;flex-direction:column;gap:0;background:var(--n9);border-radius:var(--rlg);overflow:hidden}
+.calc-display{background:var(--n9);padding:16px 18px 10px;text-align:right}
+.calc-expr{font-size:12px;color:var(--n4);min-height:16px;margin-bottom:4px;word-break:break-all}
+.calc-result{font-size:32px;font-weight:600;color:var(--w);word-break:break-all;min-height:42px}
+.calc-tabs{display:flex;gap:0;background:rgba(255,255,255,.05)}
+.calc-tab{flex:1;padding:8px 4px;text-align:center;font-size:11px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;transition:background .15s;letter-spacing:.04em;text-transform:uppercase}
+.calc-tab.active{background:rgba(255,255,255,.12);color:var(--g3)}
+.calc-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.07)}
+.calc-btn{background:rgba(255,255,255,.08);padding:17px 0;text-align:center;font-size:18px;font-weight:500;color:var(--w);cursor:pointer;transition:background .1s;user-select:none;touch-action:manipulation}
+.calc-btn:active{background:rgba(255,255,255,.22)}
+.calc-btn.op{background:rgba(46,139,71,.3);color:var(--g3)}
+.calc-btn.op:active{background:rgba(46,139,71,.5)}
+.calc-btn.eq{background:var(--g7);color:var(--w);font-size:22px}
+.calc-btn.eq:active{background:var(--g5)}
+.calc-btn.clr{background:rgba(220,38,38,.25);color:#fca5a5;font-size:14px}
+.calc-btn.clr:active{background:rgba(220,38,38,.4)}
+.calc-btn.span2{grid-column:span 2}
+
+.dose-panel{display:flex;flex-direction:column;gap:10px;padding:14px;background:rgba(255,255,255,.06)}
+.dose-panel .flbl{color:rgba(255,255,255,.6);font-size:11px}
+.dose-panel .iwrap{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)}
+.dose-panel .iwrap input{color:var(--w);font-size:15px;min-height:42px}
+.dose-panel .iwrap input::placeholder{color:rgba(255,255,255,.3)}
+.dose-panel .iwrap .ipfx,.dose-panel .iwrap .isfx{color:rgba(255,255,255,.4)}
+.dose-result-box{background:rgba(46,139,71,.2);border:1px solid rgba(109,191,130,.3);border-radius:var(--rmd);padding:12px 14px;text-align:center}
+.dose-result-box .drlbl{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:4px}
+.dose-result-box .drval{font-size:26px;font-weight:700;color:var(--g3)}
+.dose-result-box .drsub{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+
+/* ══ ANOTAÇÕES ══ */
+.nota-card{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--rmd);overflow:hidden;cursor:pointer;transition:border-color .15s}
+.nota-card:active{border-color:var(--g3)}
+.nota-head{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 13px 8px}
+.nota-title{font-size:13px;font-weight:600;color:var(--n9);flex:1;margin-right:8px}
+.nota-lote{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--g1);color:var(--g7)}
+.nota-body{padding:0 13px 11px;font-size:12px;color:var(--n6);line-height:1.5}
+.nota-foot{padding:8px 13px;border-top:1px solid var(--n1);display:flex;align-items:center;gap:8px}
+.nota-date{font-size:10px;color:var(--n4);flex:1}
+.nota-badge{font-size:10px;color:var(--n4);display:flex;align-items:center;gap:3px}
+
+.nota-form{display:flex;flex-direction:column;gap:10px}
+.media-btns{display:flex;gap:8px}
+.media-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--n1);border:1.5px solid var(--n2);border-radius:var(--rmd);padding:10px;font-size:12px;font-weight:600;color:var(--n6);cursor:pointer;transition:background .15s}
+.media-btn:active{background:var(--n2)}
+.media-btn.active{background:var(--g1);border-color:var(--g3);color:var(--g7)}
+.media-preview{display:flex;flex-wrap:wrap;gap:6px}
+.media-thumb{width:56px;height:56px;border-radius:var(--rsm);background:var(--n1);border:1px solid var(--n2);display:flex;align-items:center;justify-content:center;font-size:20px;position:relative}
+.media-thumb .rm-thumb{position:absolute;top:-6px;right:-6px;width:16px;height:16px;background:var(--r6);color:var(--w);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer}
+.audio-indicator{background:var(--g1);border:1px solid var(--g3);border-radius:var(--rmd);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g7);font-weight:600}
+.audio-wave{display:flex;gap:2px;align-items:center}
+.audio-wave span{width:3px;background:var(--g5);border-radius:2px;animation:wave .8s ease-in-out infinite}
+.audio-wave span:nth-child(1){height:8px;animation-delay:0s}
+.audio-wave span:nth-child(2){height:14px;animation-delay:.1s}
+.audio-wave span:nth-child(3){height:10px;animation-delay:.2s}
+.audio-wave span:nth-child(4){height:16px;animation-delay:.15s}
+.audio-wave span:nth-child(5){height:6px;animation-delay:.3s}
+@keyframes wave{0%,100%{opacity:.5;transform:scaleY(.8)}50%{opacity:1;transform:scaleY(1)}}
+
+/* MODAL */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:200;animation:mfade .2s ease}
+.modal-overlay.hidden{display:none}
+@keyframes mfade{from{opacity:0}to{opacity:1}}
+.modal{background:var(--w);border-radius:var(--rlg) var(--rlg) 0 0;padding:20px 18px calc(var(--sb)+20px);width:100%;animation:mslide .25s cubic-bezier(.4,0,.2,1)}
+@keyframes mslide{from{transform:translateY(40px)}to{transform:translateY(0)}}
+.modal-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--n9);margin-bottom:3px}
+.modal-sub{font-size:11px;color:var(--n4);margin-bottom:16px}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+.mbtn{flex:1;padding:12px;border:none;border-radius:var(--rmd);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.mbtn:active{opacity:.8}
+.mbtn.primary{background:var(--g7);color:var(--w)}
+.mbtn.ghost{background:var(--n1);color:var(--n6);border:1.5px solid var(--n2)}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(var(--tab)+var(--sb)+14px);right:18px;width:50px;height:50px;background:var(--g7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--w);cursor:pointer;box-shadow:0 4px 16px rgba(26,92,42,.4);z-index:90;transition:transform .15s;touch-action:manipulation}
+.fab:active{transform:scale(.9)}
+.fab.hidden{display:none}
+
+@media(min-width:430px){
+  body{align-items:center;min-height:100vh;padding:24px 0}
+  .app{border-radius:36px;height:88vh;max-height:900px;box-shadow:0 12px 40px rgba(0,0,0,.14)}
+  .tabbar{position:absolute;border-radius:0 0 36px 36px}
+  .fab{position:absolute}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ HOME ═══ -->
+<div class="screen active" id="screen-home">
+  <div class="hero">
+    <div class="eyebrow">🌾 AgroGestão v4.0</div>
+    <h1 class="htitle">Gestão<br><em>de Campo</em></h1>
+    <p class="hsub" id="home-safra">Pecuária de corte · Safra 2025</p>
+    <div class="farm-badge" id="farm-badge-btn" onclick="openFarmModal()">
+      <span>🏡</span><span id="farm-badge-label">Configurar Fazenda</span>
+    </div>
+  </div>
+  <div class="hscroll">
+    <div id="alert-container" class="alert-strip"></div>
+    <p class="slabel">Módulos Principais</p>
+    <div class="mcard primary" onclick="navigate('financeiro')">
+      <div class="mico">💰</div>
+      <div class="minfo"><div class="mtitle">Gestão Financeira</div><div class="mdesc">Custo/@ · fluxo de caixa · equilíbrio</div></div>
+      <div class="marr">›</div>
+    </div>
+    <div class="mcard" onclick="navigate('pesagem')">
+      <div class="mico">⚖️</div>
+      <div class="minfo"><div class="mtitle">Pesagem &amp; GMD</div><div class="mdesc">Défice · plano alimentar · ganho diário</div></div>
+      <div class="marr">›</div>
+    </div>
+    <p class="slabel">Ferramentas</p>
+    <div class="grid2">
+      <div class="mcard-sm" onclick="navigate('calendario')">
+        <div class="mico-sm">📅</div>
+        <div class="sm-title">Calendário</div>
+        <div class="sm-desc">Alertas sanitários</div>
+      </div>
+      <div class="mcard-sm amber" onclick="navigate('calculadora')">
+        <div class="mico-sm" style="background:var(--a1)">🧮</div>
+        <div class="sm-title">Calculadora</div>
+        <div class="sm-desc">Dosagem &amp; suplemento</div>
+      </div>
+      <div class="mcard-sm blue" onclick="navigate('anotacoes')">
+        <div class="mico-sm" style="background:var(--b1)">📝</div>
+        <div class="sm-title">Anotações</div>
+        <div class="sm-desc">Foto · áudio · lote</div>
+      </div>
+      <div class="mcard-sm red" onclick="navigate('sanitario')">
+        <div class="mico-sm" style="background:var(--r1)">💉</div>
+        <div class="sm-title">Sanitário</div>
+        <div class="sm-desc">Vacinas &amp; vermífugos</div>
+      </div>
+    </div>
+    <p class="slabel">Histórico Recente</p>
+    <div id="hist-list"><div class="hist-empty" id="hist-empty">Nenhum cálculo registado ainda.</div></div>
+    <div class="strow">
+      <div class="stpill"><div class="stval">CA</div><div class="stlbl">Conv. Alimentar 7,0</div></div>
+      <div class="stpill"><div class="stval">v4</div><div class="stlbl">MVP Campo</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FINANCEIRO ═══ -->
+<div class="screen" id="screen-financeiro">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Gestão Financeira</h2>
+    <p class="ssub">Múltiplos custos · custo por arroba · equilíbrio</p>
+  </div>
+  <div class="sbody">
+    <div class="fgrp">
+      <label class="flbl">📈 Receita Total</label>
+      <div class="iwrap" id="wrap-ganhos"><span class="ipfx">R$</span>
+        <input type="number" id="fin-ganhos" placeholder="0" min="0" step="1" inputmode="decimal" oninput="atualizarPE()">
+      </div>
+      <span class="ferr" id="err-ganhos">Informe um valor válido.</span>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">📉 Custos (adicione por categoria)</label>
+      <div class="cost-lines" id="cost-lines"></div>
+      <div class="addbtn" onclick="addCostLine()">＋ Adicionar custo</div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">🎯 Preço de venda por arroba (@)</label>
+      <div class="iwrap"><span class="ipfx">R$</span>
+        <input type="number" id="fin-parr" placeholder="185" min="0" step="1" inputmode="decimal" oninput="atualizarPE()">
+        <span class="isfx">/ @</span>
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">⚖️ Total em arrobas (@)</label>
+      <div class="iwrap">
+        <input type="number" id="fin-arrobas" placeholder="17" min="0" step="1" inputmode="decimal" oninput="atualizarPE()">
+        <span class="isfx">@</span>
+      </div>
+    </div>
+    <button class="ctabtn" onclick="calcularFinanceiro()">Calcular Resultado</button>
+    <div class="pe-card" id="pe-live-card">
+      <div class="pe-hdr"><span>⚡</span><span class="pe-title">Ponto de Equilíbrio</span><span class="pe-tag">Ao vivo</span></div>
+      <div class="pe-row"><span class="pl">Custo total acumulado</span><span class="pv" id="pe-custo-total">—</span></div>
+      <div class="pe-row"><span class="pl">Preço mín. p/ cobrir custos</span><span class="pv big" id="pe-preco-min">—</span></div>
+      <div class="pe-row"><span class="pl">Margem atual</span><span class="pv" id="pe-margem">—</span></div>
+      <div class="pe-row"><span class="pl pe-live">Actualiza em tempo real</span><span></span></div>
+    </div>
+    <div class="rpanel hidden" id="fin-resultado">
+      <div class="rphdr">Resumo Financeiro</div>
+      <div class="rrow"><span class="rl">Receita Total</span><span class="rv" id="fin-r-ganhos">—</span></div>
+      <div class="rrow"><span class="rl">Custos Totais</span><span class="rv" id="fin-r-custos">—</span></div>
+      <div class="rrow"><span class="rl">Custo por Arroba</span><span class="rv" id="fin-r-custarr">—</span></div>
+      <div class="rrow"><span class="rl" style="font-weight:700;color:#111">Lucro / Prejuízo</span><span class="rv" id="fin-r-lucro">—</span></div>
+    </div>
+    <div class="sbadge hidden" id="fin-status">
+      <div class="bdot"></div>
+      <div><div class="btxt" id="fin-status-text"></div><div class="bsub" id="fin-status-sub"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PESAGEM ═══ -->
+<div class="screen" id="screen-pesagem">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Pesagem &amp; GMD</h2>
+    <p class="ssub">Peso · défice · ganho médio diário</p>
+  </div>
+  <div class="sbody">
+    <div class="fgrp">
+      <label class="flbl">🐂 Identificação do Lote</label>
+      <div class="iwrap"><input type="text" id="pes-lote" placeholder="Ex: Lote A - Nelore" maxlength="30"></div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">🎯 Peso Ideal / Meta</label>
+      <div class="iwrap" id="wrap-ideal">
+        <input type="number" id="pes-ideal" placeholder="450" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()">
+        <span class="isfx">kg</span>
+      </div>
+      <span class="ferr" id="err-ideal">Informe o peso ideal.</span>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">⚖️ Peso Atual</label>
+      <div class="iwrap" id="wrap-atual">
+        <input type="number" id="pes-atual" placeholder="380" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()">
+        <span class="isfx">kg</span>
+      </div>
+      <span class="ferr" id="err-atual">Informe o peso atual.</span>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">📅 Dias no confinamento</label>
+      <div class="iwrap">
+        <input type="number" id="pes-dias" placeholder="90" min="1" step="1" inputmode="decimal" oninput="atualizarPEPes()">
+        <span class="isfx">dias</span>
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">🌽 Preço do KG de Ração</label>
+      <div class="iwrap" id="wrap-preco">
+        <span class="ipfx">R$</span>
+        <input type="number" id="pes-preco" placeholder="4" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()">
+      </div>
+      <span class="ferr" id="err-preco">Informe o preço da ração.</span>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">💲 Preço esperado de venda por @</label>
+      <div class="iwrap">
+        <span class="ipfx">R$</span>
+        <input type="number" id="pes-pvenda" placeholder="185" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()">
+        <span class="isfx">/ @</span>
+      </div>
+    </div>
+    <button class="ctabtn" onclick="calcularPesagem()">Verificar Peso &amp; GMD</button>
+    <div class="pe-card" id="pe-pes-card">
+      <div class="pe-hdr"><span>⚡</span><span class="pe-title">Equilíbrio de Engorda</span><span class="pe-tag">Ao vivo</span></div>
+      <div class="pe-row"><span class="pl">GMD estimado</span><span class="pv" id="ppe-gmd">—</span></div>
+      <div class="pe-row"><span class="pl">Custo estimado de engorda</span><span class="pv" id="ppe-custo">—</span></div>
+      <div class="pe-row"><span class="pl">Arrobas ganhas (@ = 15 kg)</span><span class="pv" id="ppe-arrobas">—</span></div>
+      <div class="pe-row"><span class="pl">Preço mín. por @ p/ equilibrar</span><span class="pv big" id="ppe-preco-min">—</span></div>
+      <div class="pe-row"><span class="pl">Resultado esperado</span><span class="pv" id="ppe-resultado">—</span></div>
+      <div class="pe-row"><span class="pl pe-live">Actualiza em tempo real</span><span></span></div>
+    </div>
+    <div class="sbadge hidden" id="pes-status"><div class="bdot"></div>
+      <div><div class="btxt" id="pes-status-text"></div><div class="bsub" id="pes-status-sub"></div></div>
+    </div>
+    <div class="nblock hidden" id="nutri-panel">
+      <div class="nhdr"><span>🌽</span><span class="ntitle">Plano de Nutrição</span><span class="ntag">Automático</span></div>
+      <div class="nrow"><span class="nl">Défice de peso</span><span class="nv" id="nutri-defice">—</span></div>
+      <div class="nrow"><span class="nl">GMD registado</span><span class="nv" id="nutri-gmd">—</span></div>
+      <div class="nrow"><span class="nl">Conversão Alimentar (CA)</span><span class="nv">7,0</span></div>
+      <div class="nrow"><span class="nl">KG de ração necessário</span><span class="nv" id="nutri-racao">—</span></div>
+      <div class="nrow"><span class="nl">Preço por KG</span><span class="nv" id="nutri-preco-kg">—</span></div>
+      <div class="nrow"><span class="nl">Custo total estimado</span><span class="nv big" id="nutri-custo">—</span></div>
+    </div>
+    <div class="reccard hidden" id="nutri-rec">
+      <div class="rectxt"><strong>Recomendação:</strong> acompanhar a dieta conforme o plano e pesar novamente em <strong>30 dias</strong>. Agende a próxima pesagem no <span style="color:var(--g7);cursor:pointer;font-weight:600" onclick="navigate('calendario')">Calendário</span>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CALENDÁRIO ═══ -->
+<div class="screen" id="screen-calendario">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Calendário</h2>
+    <p class="ssub">Plano sanitário · pesagens · alertas automáticos</p>
+  </div>
+  <div class="sbody">
+    <div class="cal-header">
+      <div class="cal-nav" onclick="calNav(-1)">‹</div>
+      <div class="cal-month" id="cal-month-label"></div>
+      <div class="cal-nav" onclick="calNav(1)">›</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="add-event-form hidden" id="add-event-form">
+      <div class="fgrp">
+        <label class="flbl">📌 Tipo de Evento</label>
+        <div class="iwrap">
+          <select id="ev-tipo">
+            <option value="sanitario">💉 Sanitário (Vacina/Vermífugo)</option>
+            <option value="pesagem">⚖️ Pesagem programada</option>
+            <option value="financeiro">💰 Financeiro (Venda/Compra)</option>
+            <option value="geral">📋 Geral</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">✏️ Descrição</label>
+        <div class="iwrap"><input type="text" id="ev-desc" placeholder="Ex: Vacinação Aftosa — Lote A" maxlength="60"></div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">🐂 Lote (opcional)</label>
+        <div class="iwrap"><input type="text" id="ev-lote" placeholder="Ex: Lote A" maxlength="30"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="ctabtn" style="flex:1" onclick="saveEvent()">Salvar Evento</button>
+        <button class="ctabtn" style="flex:0 0 auto;width:48px;background:var(--n1);color:var(--n6);box-shadow:none;border:1.5px solid var(--n2)" onclick="$('add-event-form').classList.add('hidden')">✕</button>
+      </div>
+    </div>
+    <div id="event-list-section">
+      <p class="slabel" id="event-list-label">Próximos Eventos</p>
+      <div class="event-list" id="event-list"></div>
+    </div>
+  </div>
+</div>
+<div class="fab" id="fab-cal" onclick="toggleAddEventForm()">＋</div>
+
+<!-- ═══ CALCULADORA ═══ -->
+<div class="screen" id="screen-calculadora">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Calculadora</h2>
+    <p class="ssub">Cálculos rápidos · dosagem · suplementação</p>
+  </div>
+  <div class="sbody" style="padding:14px 14px calc(var(--tab) + var(--sb) + 14px)">
+    <div class="calc-wrap">
+      <div class="calc-display">
+        <div class="calc-expr" id="calc-expr"></div>
+        <div class="calc-result" id="calc-result">0</div>
+      </div>
+      <div class="calc-tabs">
+        <div class="calc-tab active" id="tab-normal" onclick="switchCalcTab('normal')">Geral</div>
+        <div class="calc-tab" id="tab-dose" onclick="switchCalcTab('dose')">Dosagem</div>
+        <div class="calc-tab" id="tab-supl" onclick="switchCalcTab('supl')">Suplemento</div>
+      </div>
+      <div id="calc-btns-normal">
+        <div class="calc-btns">
+          <div class="calc-btn clr" onclick="calcClear()">AC</div>
+          <div class="calc-btn op" onclick="calcInput('(')">(</div>
+          <div class="calc-btn op" onclick="calcInput(')')">)</div>
+          <div class="calc-btn op" onclick="calcInput('/')">÷</div>
+          <div class="calc-btn" onclick="calcInput('7')">7</div>
+          <div class="calc-btn" onclick="calcInput('8')">8</div>
+          <div class="calc-btn" onclick="calcInput('9')">9</div>
+          <div class="calc-btn op" onclick="calcInput('*')">×</div>
+          <div class="calc-btn" onclick="calcInput('4')">4</div>
+          <div class="calc-btn" onclick="calcInput('5')">5</div>
+          <div class="calc-btn" onclick="calcInput('6')">6</div>
+          <div class="calc-btn op" onclick="calcInput('-')">−</div>
+          <div class="calc-btn" onclick="calcInput('1')">1</div>
+          <div class="calc-btn" onclick="calcInput('2')">2</div>
+          <div class="calc-btn" onclick="calcInput('3')">3</div>
+          <div class="calc-btn op" onclick="calcInput('+')">+</div>
+          <div class="calc-btn" onclick="calcInput('.')">.</div>
+          <div class="calc-btn" onclick="calcInput('0')">0</div>
+          <div class="calc-btn clr" onclick="calcBackspace()">⌫</div>
+          <div class="calc-btn eq" onclick="calcEquals()">=</div>
+        </div>
+      </div>
+      <div id="calc-btns-dose" style="display:none">
+        <div class="dose-panel">
+          <div class="fgrp"><label class="flbl">💊 Medicamento / Produto</label>
+            <div class="iwrap"><input type="text" id="dose-nome" placeholder="Ex: Ivermectina 1%" style="color:var(--w);font-size:14px;min-height:42px;background:none"></div>
+          </div>
+          <div class="fgrp"><label class="flbl">⚖️ Peso do animal</label>
+            <div class="iwrap"><input type="number" id="dose-peso" placeholder="380" min="0" step="1" inputmode="decimal" oninput="calcDose()" style="color:var(--w);font-size:15px;min-height:42px;background:none">
+              <span class="isfx">kg</span></div>
+          </div>
+          <div class="fgrp"><label class="flbl">💉 Dose por 10 kg</label>
+            <div class="iwrap"><input type="number" id="dose-por10" placeholder="1" min="0" step="1" inputmode="decimal" oninput="calcDose()" style="color:var(--w);font-size:15px;min-height:42px;background:none">
+              <span class="isfx">ml / 10 kg</span></div>
+          </div>
+          <div class="dose-result-box" id="dose-result-box">
+            <div class="drlbl">Dose total calculada</div>
+            <div class="drval" id="dose-result-val">—</div>
+            <div class="drsub" id="dose-result-sub">Preencha peso e dose</div>
+          </div>
+        </div>
+      </div>
+      <div id="calc-btns-supl" style="display:none">
+        <div class="dose-panel">
+          <div class="fgrp"><label class="flbl">🌾 Suplemento / Ração</label>
+            <div class="iwrap"><input type="text" id="supl-nome" placeholder="Ex: Sal Mineral Engorda" style="color:var(--w);font-size:14px;min-height:42px;background:none"></div>
+          </div>
+          <div class="fgrp"><label class="flbl">🐂 Nº de animais</label>
+            <div class="iwrap"><input type="number" id="supl-animais" placeholder="50" min="1" step="1" inputmode="decimal" oninput="calcSupl()" style="color:var(--w);font-size:15px;min-height:42px;background:none">
+              <span class="isfx">animais</span></div>
+          </div>
+          <div class="fgrp"><label class="flbl">📦 Consumo por animal / dia</label>
+            <div class="iwrap"><input type="number" id="supl-cons" placeholder="100" min="0" step="1" inputmode="decimal" oninput="calcSupl()" style="color:var(--w);font-size:15px;min-height:42px;background:none">
+              <span class="isfx">g/dia</span></div>
+          </div>
+          <div class="fgrp"><label class="flbl">📅 Período (dias)</label>
+            <div class="iwrap"><input type="number" id="supl-dias" placeholder="30" min="1" step="1" inputmode="decimal" oninput="calcSupl()" style="color:var(--w);font-size:15px;min-height:42px;background:none">
+              <span class="isfx">dias</span></div>
+          </div>
+          <div class="fgrp"><label class="flbl">💰 Preço por kg do suplemento</label>
+            <div class="iwrap"><span class="ipfx" style="color:rgba(255,255,255,.4)">R$</span>
+              <input type="number" id="supl-preco" placeholder="5" min="0" step="1" inputmode="decimal" oninput="calcSupl()" style="color:var(--w);font-size:15px;min-height:42px;background:none">
+            </div>
+          </div>
+          <div class="dose-result-box" id="supl-result-box">
+            <div class="drlbl">Total necessário &amp; custo</div>
+            <div class="drval" id="supl-result-val">—</div>
+            <div class="drsub" id="supl-result-sub">Preencha os campos acima</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ANOTAÇÕES ═══ -->
+<div class="screen" id="screen-anotacoes">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Anotações</h2>
+    <p class="ssub">Foto · áudio · vinculadas ao lote</p>
+  </div>
+  <div class="sbody">
+    <div class="nota-form" id="nota-form">
+      <div class="fgrp">
+        <label class="flbl">🐂 Lote / Animal</label>
+        <div class="iwrap"><input type="text" id="nota-lote" placeholder="Ex: Lote A — Boi 17" maxlength="30"></div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">✏️ Anotação</label>
+        <div class="iwrap"><textarea id="nota-texto" placeholder="Descreva a observação, sintoma, conduta…" rows="3"></textarea></div>
+      </div>
+      <div class="media-btns">
+        <div class="media-btn" id="btn-foto" onclick="toggleFoto()">📷 Foto</div>
+        <div class="media-btn" id="btn-audio" onclick="toggleAudio()">🎙️ Áudio</div>
+      </div>
+      <div class="media-preview" id="media-preview"></div>
+      <div class="audio-indicator hidden" id="audio-indicator">
+        <div class="audio-wave"><span></span><span></span><span></span><span></span><span></span></div>
+        <span>Gravando áudio…</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--g7)" id="audio-timer">0:00</span>
+      </div>
+      <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoChange(event)">
+      <button class="ctabtn" onclick="salvarNota()">Salvar Anotação</button>
+    </div>
+    <p class="slabel">Anotações Salvas</p>
+    <div id="notas-list"><div class="hist-empty">Nenhuma anotação ainda.</div></div>
+  </div>
+</div>
+
+<!-- ═══ SANITÁRIO ═══ -->
+<div class="screen" id="screen-sanitario">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Plano Sanitário</h2>
+    <p class="ssub">Vacinas · vermífugos · alertas automáticos</p>
+  </div>
+  <div class="sbody">
+    <div class="fgrp">
+      <label class="flbl">💉 Tipo de procedimento</label>
+      <div class="iwrap">
+        <select id="san-tipo">
+          <option value="Vacina Aftosa">Vacina Aftosa</option>
+          <option value="Vacina Brucelose">Vacina Brucelose</option>
+          <option value="Vacina Raiva">Vacina Raiva</option>
+          <option value="Vermífugo">Vermífugo</option>
+          <option value="Carrapaticida">Carrapaticida</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">🐂 Lote</label>
+      <div class="iwrap"><input type="text" id="san-lote" placeholder="Ex: Lote A — 50 animais" maxlength="40"></div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">📅 Data de aplicação</label>
+      <div class="iwrap"><input type="date" id="san-data" style="font-size:15px;min-height:46px"></div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">🔁 Próxima aplicação (dias)</label>
+      <div class="iwrap">
+        <input type="number" id="san-intervalo" placeholder="180" min="1" step="1" inputmode="decimal">
+        <span class="isfx">dias</span>
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">📝 Observação (opcional)</label>
+      <div class="iwrap"><input type="text" id="san-obs" placeholder="Ex: Produto utilizado, dose…" maxlength="80"></div>
+    </div>
+    <button class="ctabtn" onclick="salvarSanitario()">Registar &amp; Agendar Alerta</button>
+    <p class="slabel">Histórico Sanitário</p>
+    <div id="sanitario-list"><div class="hist-empty">Nenhum registro ainda.</div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB BAR ═══ -->
+<nav class="tabbar">
+  <div class="titem active" id="tab-home" onclick="navigate('home')"><div class="tico">🏠</div><div class="tlbl">Início</div></div>
+  <div class="titem" id="tab-financeiro" onclick="navigate('financeiro')"><div class="tico">💰</div><div class="tlbl">Finanças</div></div>
+  <div class="titem" id="tab-pesagem" onclick="navigate('pesagem')"><div class="tico">⚖️</div><div class="tlbl">Pesagem</div></div>
+  <div class="titem" id="tab-calendario" onclick="navigate('calendario')"><div class="tico">📅</div><div class="tlbl">Agenda</div></div>
+  <div class="titem" id="tab-anotacoes" onclick="navigate('anotacoes')"><div class="tico">📝</div><div class="tlbl">Notas</div></div>
+</nav>
+
+<!-- ═══ MODAL FAZENDA ═══ -->
+<div class="modal-overlay hidden" id="farm-modal">
+  <div class="modal">
+    <div class="modal-title">Sua Fazenda</div>
+    <div class="modal-sub">Personalize o app com os seus dados</div>
+    <div class="fgrp" style="margin-bottom:10px"><label class="flbl">🏡 Nome da Fazenda</label>
+      <div class="iwrap"><input type="text" id="farm-name" placeholder="Ex: Fazenda Santa Rita" maxlength="40"></div></div>
+    <div class="fgrp" style="margin-bottom:10px"><label class="flbl">👤 Produtor</label>
+      <div class="iwrap"><input type="text" id="farm-owner" placeholder="Ex: João da Silva" maxlength="40"></div></div>
+    <div class="fgrp"><label class="flbl">📅 Safra / Período</label>
+      <div class="iwrap"><input type="text" id="farm-safra" placeholder="Ex: Safra 2025" maxlength="20"></div></div>
+    <div class="modal-btns">
+      <button class="mbtn ghost" onclick="closeFarmModal()">Cancelar</button>
+      <button class="mbtn primary" onclick="saveFarm()">Salvar</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const BRL = v => (+v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const KG  = v => (+v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' kg';
+const S = {
+  get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){}},
+  getJ(k,def=[]){try{return JSON.parse(S.get(k)||'null')||def}catch(e){return def}},
+  setJ(k,v){S.set(k,JSON.stringify(v))}
+};
+
+/* ── NAVIGATE ── */
+function navigate(to){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-'+to).classList.add('active');
+  document.querySelectorAll('.titem').forEach(t=>t.classList.remove('active'));
+  const t=$('tab-'+to);if(t)t.classList.add('active');
+  const body=document.querySelector('#screen-'+to+' .sbody,#screen-'+to+' .hscroll');
+  if(body)body.scrollTo(0,0);
+  S.set('agro_screen',to);
+  $('fab-cal').classList.toggle('hidden',to!=='calendario');
+  if(to==='home'){renderHistorico();renderAlerts();}
+  if(to==='calendario')renderCal();
+  if(to==='anotacoes')renderNotas();
+  if(to==='sanitario')renderSanitario();
+}
+
+/* ── FAZENDA ── */
+function openFarmModal(){
+  $('farm-name').value=S.get('farm_name')||'';
+  $('farm-owner').value=S.get('farm_owner')||'';
+  $('farm-safra').value=S.get('farm_safra')||'';
+  $('farm-modal').classList.remove('hidden');
+}
+function closeFarmModal(){$('farm-modal').classList.add('hidden')}
+function saveFarm(){
+  S.set('farm_name',$('farm-name').value.trim());
+  S.set('farm_owner',$('farm-owner').value.trim());
+  S.set('farm_safra',$('farm-safra').value.trim());
+  closeFarmModal();applyFarmBranding();
+}
+function applyFarmBranding(){
+  const fn=S.get('farm_name')||'';const fo=S.get('farm_owner')||'';const fs=S.get('farm_safra')||'';
+  $('farm-badge-label').textContent=fn||(fo||'Configurar Fazenda');
+  $('home-safra').textContent=fs||'Pecuária de corte · Safra 2025';
+}
+
+/* ── COST LINES ── */
+let costId=0;
+function addCostLine(name='',val=''){
+  const id='cl-'+costId++;
+  const div=document.createElement('div');div.className='cost-line';div.id=id;
+  div.innerHTML=`<div class="iwrap" style="flex:1.5"><input type="text" class="cname" placeholder="Ração, Transporte…" value="${name}" maxlength="28" oninput="atualizarPE()"></div>
+  <div class="iwrap" style="flex:1"><span class="ipfx">R$</span><input type="number" class="cval" placeholder="0" min="0" step="1" inputmode="decimal" value="${val}" oninput="atualizarPE()"></div>
+  <div class="delbtn" onclick="removeCostLine('${id}')">✕</div>`;
+  $('cost-lines').appendChild(div);
+}
+function removeCostLine(id){const el=$(id);if(el)el.remove();atualizarPE();}
+function getCostLines(){
+  let total=0;
+  document.querySelectorAll('.cost-line').forEach(l=>{total+=parseFloat(l.querySelector('.cval').value)||0;});
+  return total;
+}
+
+/* ── PE FINANCEIRO ── */
+function atualizarPE(){
+  const ct=getCostLines();const parr=parseFloat($('fin-parr').value)||0;const arr=parseFloat($('fin-arrobas').value)||0;
+  $('pe-custo-total').textContent=ct>0?BRL(ct):'—';
+  if(arr>0&&ct>0){
+    const pm=ct/arr;$('pe-preco-min').textContent=BRL(pm)+' / @';$('pe-preco-min').className='pv big';
+    if(parr>0){const m=((parr-pm)/pm)*100;const c=m>=0?'color:var(--g3)':'color:#fca5a5';$('pe-margem').innerHTML=`<span style="${c}">${m>=0?'+':''}${m.toFixed(1)}%</span>`;}
+    else $('pe-margem').textContent='—';
+  } else {$('pe-preco-min').textContent='—';$('pe-preco-min').className='pv big';$('pe-margem').textContent='—';}
+}
+
+/* ── PE PESAGEM ── */
+function atualizarPEPes(){
+  const ideal=parseFloat($('pes-ideal').value)||0;const atual=parseFloat($('pes-atual').value)||0;
+  const preco=parseFloat($('pes-preco').value)||0;const pvenda=parseFloat($('pes-pvenda').value)||0;
+  const dias=parseFloat($('pes-dias').value)||0;const CA=7.0;
+  if(ideal>0&&atual>0&&atual<ideal&&preco>0){
+    const defice=ideal-atual;const racao=defice*CA;const custo=racao*preco;const arr=defice/15;
+    const pm=arr>0?custo/arr:0;
+    const gmd=dias>0?(defice/dias).toFixed(3)+' kg/dia':'—';
+    $('ppe-gmd').textContent=gmd;$('ppe-custo').textContent=BRL(custo);$('ppe-arrobas').textContent=arr.toFixed(2)+' @';
+    $('ppe-preco-min').textContent=pm>0?BRL(pm)+' / @':'—';
+    if(pvenda>0&&pm>0){const r=(pvenda-pm)*arr;const c=r>=0?'color:var(--g3)':'color:#fca5a5';$('ppe-resultado').innerHTML=`<span style="${c}">${BRL(r)}</span>`;}
+    else $('ppe-resultado').textContent='—';
+  } else {['ppe-gmd','ppe-custo','ppe-arrobas','ppe-preco-min','ppe-resultado'].forEach(id=>$(id).textContent='—');}
+}
+
+/* ── CALC FINANCEIRO ── */
+function calcularFinanceiro(){
+  const ganhos=parseFloat($('fin-ganhos').value);
+  $('wrap-ganhos').classList.remove('error');$('err-ganhos').classList.remove('visible');
+  if(isNaN(ganhos)||ganhos<0){$('wrap-ganhos').classList.add('error');$('err-ganhos').classList.add('visible');return;}
+  const ct=getCostLines();const arr=parseFloat($('fin-arrobas').value)||0;const lucro=ganhos-ct;
+  $('fin-r-ganhos').textContent=BRL(ganhos);$('fin-r-custos').textContent=BRL(ct);
+  $('fin-r-custarr').textContent=arr>0?BRL(ct/arr)+' / @':'—';
+  const el=$('fin-r-lucro');el.textContent=BRL(Math.abs(lucro));el.className='rv '+(lucro>=0?'grn':'red');
+  $('fin-resultado').classList.remove('hidden');
+  const s=$('fin-status');s.className='sbadge '+(lucro>=0?'success':'danger');
+  $('fin-status-text').textContent=lucro>=0?'✅ OPERAÇÃO SAUDÁVEL':'❌ PREJUÍZO';
+  $('fin-status-sub').textContent=lucro>=0?'Resultado positivo confirmado.':'Reveja os custos e a estratégia de venda.';
+  s.classList.remove('hidden');
+  saveHistorico({tipo:'Financeiro',resumo:`Receita ${BRL(ganhos)} · Custos ${BRL(ct)}`,resultado:`${lucro>=0?'+':''}${BRL(lucro)}`,ok:lucro>=0});
+}
+
+/* ── CALC PESAGEM ── */
+function calcularPesagem(){
+  const ideal=parseFloat($('pes-ideal').value);const atual=parseFloat($('pes-atual').value);const preco=parseFloat($('pes-preco').value);
+  let valid=true;
+  [['wrap-ideal','err-ideal'],['wrap-atual','err-atual'],['wrap-preco','err-preco']].forEach(([w,e])=>{$(w).classList.remove('error');$(e).classList.remove('visible');});
+  if(isNaN(ideal)||ideal<=0){$('wrap-ideal').classList.add('error');$('err-ideal').classList.add('visible');valid=false;}
+  if(isNaN(atual)||atual<=0){$('wrap-atual').classList.add('error');$('err-atual').classList.add('visible');valid=false;}
+  if(isNaN(preco)||preco<=0){$('wrap-preco').classList.add('error');$('err-preco').classList.add('visible');valid=false;}
+  if(!valid)return;
+  const dias=parseFloat($('pes-dias').value)||0;const lote=$('pes-lote').value.trim();
+  const s=$('pes-status');const nutri=$('nutri-panel');const rec=$('nutri-rec');
+  if(atual>=ideal){
+    s.className='sbadge success';$('pes-status-text').textContent='✅ Animal no peso ideal';
+    $('pes-status-sub').textContent=`Peso atual (${KG(atual)}) atingiu a meta de ${KG(ideal)}.`;
+    s.classList.remove('hidden');nutri.classList.add('hidden');rec.classList.add('hidden');
+    saveHistorico({tipo:'Pesagem',resumo:`${lote||'Lote'} · Atual ${KG(atual)} · Meta ${KG(ideal)}`,resultado:'Peso certificado ✓',ok:true});
+  } else {
+    const CA=7.0;const defice=ideal-atual;const racao=defice*CA;const custo=racao*preco;
+    const gmd=dias>0?(defice/dias).toFixed(3)+' kg/dia':'—';
+    s.className='sbadge warning';$('pes-status-text').textContent='⚠️ Animal abaixo do peso';
+    $('pes-status-sub').textContent=`Défice de ${KG(defice)} — nutrição acionada.`;s.classList.remove('hidden');
+    $('nutri-defice').textContent=KG(defice);$('nutri-gmd').textContent=gmd;
+    $('nutri-racao').textContent=KG(racao);$('nutri-preco-kg').textContent=BRL(preco);$('nutri-custo').textContent=BRL(custo);
+    nutri.classList.remove('hidden');rec.classList.remove('hidden');
+    saveHistorico({tipo:'Pesagem',resumo:`${lote||'Lote'} · Défice ${KG(defice)}`,resultado:`Ração: ${BRL(custo)}`,ok:false});
+  }
+}
+
+/* ── HISTÓRICO ── */
+function saveHistorico(item){
+  let h=S.getJ('agro_hist');h.unshift({...item,ts:Date.now()});h=h.slice(0,5);S.setJ('agro_hist',h);
+}
+function renderHistorico(){
+  let h=S.getJ('agro_hist');const list=$('hist-list');const empty=$('hist-empty');
+  list.querySelectorAll('.hist-card').forEach(c=>c.remove());
+  if(!h.length){if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  h.forEach(item=>{
+    const d=new Date(item.ts);
+    const ds=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const card=document.createElement('div');card.className='hist-card';
+    card.innerHTML=`<div class="hist-head"><span class="hist-type">${item.tipo==='Financeiro'?'💰':'⚖️'} ${item.tipo}</span><span class="hist-date">${ds}</span></div>
+    <div class="hist-val" style="color:${item.ok?'var(--g5)':'var(--r6)'}">${item.resultado}</div>
+    <div class="hist-sub">${item.resumo}</div>`;
+    list.appendChild(card);
+  });
+}
+
+/* ── CALENDÁRIO ── */
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),calSelected=null;
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS=['D','S','T','Q','Q','S','S'];
+
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}else if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+
+function renderCal(){
+  $('cal-month-label').textContent=MESES[calMonth]+' '+calYear;
+  const grid=$('cal-grid');grid.innerHTML='';
+  DIAS.forEach(d=>{const el=document.createElement('div');el.className='cal-dow';el.textContent=d;grid.appendChild(el);});
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const prevDays=new Date(calYear,calMonth,0).getDate();
+  const today=new Date();const events=S.getJ('agro_events');
+  for(let i=0;i<first;i++){const el=document.createElement('div');el.className='cal-day other-month';el.textContent=prevDays-first+1+i;grid.appendChild(el);}
+  for(let d=1;d<=days;d++){
+    const el=document.createElement('div');el.className='cal-day';el.textContent=d;
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=today.getDate()===d&&today.getMonth()===calMonth&&today.getFullYear()===calYear;
+    if(isToday)el.classList.add('today');
+    if(calSelected===dateStr)el.classList.add('selected');
+    if(events.some(e=>e.data===dateStr))el.classList.add('has-event');
+    el.onclick=()=>{calSelected=dateStr;renderCal();renderEventList(dateStr);};
+    grid.appendChild(el);
+  }
+  const remaining=(7-((first+days)%7))%7;
+  for(let i=1;i<=remaining;i++){const el=document.createElement('div');el.className='cal-day other-month';el.textContent=i;grid.appendChild(el);}
+  if(!calSelected)renderEventList(null);
+}
+
+function renderEventList(dateStr){
+  const events=S.getJ('agro_events');
+  const list=$('event-list');list.innerHTML='';
+  const label=$('event-list-label');
+  let filtered=dateStr?events.filter(e=>e.data===dateStr):events.filter(e=>{const d=new Date(e.data);const today=new Date();return d>=today;}).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,8);
+  label.textContent=dateStr?`Eventos em ${dateStr.split('-').reverse().join('/')}:`:'Próximos Eventos';
+  if(!filtered.length){list.innerHTML='<div class="hist-empty">Nenhum evento nesta data.</div>';return;}
+  filtered.forEach((ev,i)=>{
+    const item=document.createElement('div');item.className=`event-item ${ev.tipo}`;
+    const badgeClass={'sanitario':'ev-san','pesagem':'ev-pes','financeiro':'ev-fin','geral':'ev-gen'}[ev.tipo]||'ev-gen';
+    const badgeLabel={'sanitario':'Sanitário','pesagem':'Pesagem','financeiro':'Financeiro','geral':'Geral'}[ev.tipo]||'Geral';
+    item.innerHTML=`<div class="event-meta"><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span class="event-title">${ev.desc}</span><span class="event-badge ${badgeClass}">${badgeLabel}</span></div>
+    <div class="event-sub">${ev.data.split('-').reverse().join('/')}${ev.lote?' · '+ev.lote:''}</div></div>
+    <div style="font-size:18px;cursor:pointer;color:var(--n4)" onclick="deleteEvent(${ev.id})">✕</div>`;
+    list.appendChild(item);
+  });
+}
+
+let evIdCounter=Date.now();
+function toggleAddEventForm(){
+  const f=$('add-event-form');f.classList.toggle('hidden');
+  if(!f.classList.contains('hidden')&&calSelected){
+    // pre-fill date in description
+  }
+}
+function saveEvent(){
+  const desc=$('ev-desc').value.trim();if(!desc){$('ev-desc').focus();return;}
+  const events=S.getJ('agro_events');
+  const dataStr=calSelected||(()=>{const t=new Date();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;})();
+  events.push({id:evIdCounter++,tipo:$('ev-tipo').value,desc,lote:$('ev-lote').value.trim(),data:dataStr});
+  S.setJ('agro_events',events);
+  $('ev-desc').value='';$('ev-lote').value='';
+  $('add-event-form').classList.add('hidden');renderCal();
+}
+function deleteEvent(id){
+  let events=S.getJ('agro_events');events=events.filter(e=>e.id!==id);S.setJ('agro_events',events);renderCal();renderEventList(calSelected);
+}
+function renderAlerts(){
+  const cont=$('alert-container');cont.innerHTML='';
+  const events=S.getJ('agro_events');
+  const today=new Date();today.setHours(0,0,0,0);
+  const soon=events.filter(e=>{const d=new Date(e.data);d.setHours(0,0,0,0);const diff=Math.round((d-today)/(86400000));return diff>=0&&diff<=7;}).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,3);
+  if(!soon.length){cont.style.display='none';return;}
+  cont.style.display='flex';
+  soon.forEach(ev=>{
+    const d=new Date(ev.data);d.setHours(0,0,0,0);const diff=Math.round((d-today)/86400000);
+    const item=document.createElement('div');
+    item.className='alert-item'+(diff===0?' red':diff<=2?' ':(ev.tipo==='sanitario'?' ':' green'));
+    item.innerHTML=`<div class="alert-dot"></div><div class="alert-txt">${ev.desc}${ev.lote?' · '+ev.lote:''}</div><div class="alert-date">${diff===0?'Hoje':diff===1?'Amanhã':'Em '+diff+'d'}</div>`;
+    item.onclick=()=>navigate('calendario');
+    cont.appendChild(item);
+  });
+}
+
+/* ── CALCULADORA ── */
+let calcExpr='',calcNew=true;
+function calcInput(v){
+  if(calcNew&&!isNaN(v)){calcExpr=v;calcNew=false;}
+  else calcExpr+=v;
+  $('calc-expr').textContent=calcExpr;
+  try{const r=Function('"use strict";return('+calcExpr+')')();$('calc-result').textContent=isFinite(r)?+r.toFixed(6):'';}catch(e){}
+}
+function calcClear(){calcExpr='';calcNew=true;$('calc-expr').textContent='';$('calc-result').textContent='0';}
+function calcBackspace(){calcExpr=calcExpr.slice(0,-1);$('calc-expr').textContent=calcExpr;try{const r=Function('"use strict";return('+calcExpr+')')();$('calc-result').textContent=isFinite(r)?+r.toFixed(6):'';}catch(e){}}
+function calcEquals(){
+  try{const r=Function('"use strict";return('+calcExpr+')')();
+    $('calc-result').textContent=isFinite(r)?+r.toFixed(6):'Erro';
+    $('calc-expr').textContent=calcExpr+' =';calcExpr=String(isFinite(r)?+r.toFixed(6):0);calcNew=false;
+  }catch(e){$('calc-result').textContent='Erro';}
+}
+function switchCalcTab(tab){
+  ['normal','dose','supl'].forEach(t=>{
+    $('tab-'+t).classList.toggle('active',t===tab);
+    $('calc-btns-'+t).style.display=t===tab?'block':'none';
+  });
+}
+function calcDose(){
+  const peso=parseFloat($('dose-peso').value)||0;const por10=parseFloat($('dose-por10').value)||0;
+  if(peso>0&&por10>0){const dose=(peso/10)*por10;$('dose-result-val').textContent=dose.toFixed(1)+' ml';$('dose-result-sub').textContent=`Para animal de ${peso} kg`;}
+  else{$('dose-result-val').textContent='—';$('dose-result-sub').textContent='Preencha peso e dose';}
+}
+function calcSupl(){
+  const animais=parseFloat($('supl-animais').value)||0;const cons=parseFloat($('supl-cons').value)||0;
+  const dias=parseFloat($('supl-dias').value)||0;const preco=parseFloat($('supl-preco').value)||0;
+  if(animais>0&&cons>0&&dias>0){
+    const totalG=animais*cons*dias;const totalKg=totalG/1000;
+    const custo=preco>0?totalKg*preco:0;
+    $('supl-result-val').textContent=totalKg.toFixed(1)+' kg';
+    $('supl-result-sub').textContent=`${totalG.toLocaleString('pt-BR')} g${preco>0?' · Custo: '+BRL(custo):''}`;
+  } else {$('supl-result-val').textContent='—';$('supl-result-sub').textContent='Preencha os campos acima';}
+}
+
+/* ── ANOTAÇÕES ── */
+let notaFotos=[],notaAudio=false,audioTimerInterval=null,audioSeconds=0;
+function toggleFoto(){$('foto-input').click();}
+function onFotoChange(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    notaFotos.push(ev.target.result);
+    renderMediaPreview();$('btn-foto').classList.add('active');
+  };reader.readAsDataURL(file);
+}
+function renderMediaPreview(){
+  const prev=$('media-preview');prev.innerHTML='';
+  notaFotos.forEach((src,i)=>{
+    const thumb=document.createElement('div');thumb.className='media-thumb';
+    thumb.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--rsm)"><div class="rm-thumb" onclick="removeThumb(${i})">✕</div>`;
+    prev.appendChild(thumb);
+  });
+}
+function removeThumb(i){notaFotos.splice(i,1);renderMediaPreview();if(!notaFotos.length)$('btn-foto').classList.remove('active');}
+function toggleAudio(){
+  if(!notaAudio){
+    notaAudio=true;audioSeconds=0;$('btn-audio').classList.add('active');$('audio-indicator').classList.remove('hidden');
+    $('audio-timer').textContent='0:00';
+    audioTimerInterval=setInterval(()=>{audioSeconds++;const m=Math.floor(audioSeconds/60);const s=String(audioSeconds%60).padStart(2,'0');$('audio-timer').textContent=m+':'+s;},1000);
+  } else {
+    notaAudio=false;clearInterval(audioTimerInterval);$('btn-audio').classList.remove('active');$('audio-indicator').classList.add('hidden');
+  }
+}
+function salvarNota(){
+  const texto=$('nota-texto').value.trim();if(!texto)return;
+  const lote=$('nota-lote').value.trim();
+  const notas=S.getJ('agro_notas');
+  notas.unshift({id:Date.now(),lote:lote||'Geral',texto,fotos:[...notaFotos],audio:notaAudio&&audioSeconds>0,audioDur:audioSeconds,ts:Date.now()});
+  S.setJ('agro_notas',notas.slice(0,20));
+  $('nota-texto').value='';$('nota-lote').value='';
+  notaFotos=[];notaAudio=false;audioSeconds=0;clearInterval(audioTimerInterval);
+  $('btn-foto').classList.remove('active');$('btn-audio').classList.remove('active');$('audio-indicator').classList.add('hidden');
+  $('media-preview').innerHTML='';renderNotas();
+}
+function renderNotas(){
+  const notas=S.getJ('agro_notas');const list=$('notas-list');list.innerHTML='';
+  if(!notas.length){list.innerHTML='<div class="hist-empty">Nenhuma anotação ainda.</div>';return;}
+  notas.forEach(n=>{
+    const d=new Date(n.ts);const ds=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const card=document.createElement('div');card.className='nota-card';
+    const fotoBadge=n.fotos&&n.fotos.length?`<span class="nota-badge">📷 ${n.fotos.length}</span>`:'';
+    const audioBadge=n.audio?`<span class="nota-badge">🎙️ ${Math.floor(n.audioDur/60)}:${String(n.audioDur%60).padStart(2,'0')}</span>`:'';
+    card.innerHTML=`<div class="nota-head"><div class="nota-title">${n.texto.substring(0,60)}${n.texto.length>60?'…':''}</div><div class="nota-lote">${n.lote}</div></div>
+    ${n.fotos&&n.fotos.length?`<div style="display:flex;gap:5px;padding:0 13px 10px;overflow-x:auto">${n.fotos.map(f=>`<img src="${f}" style="width:60px;height:60px;border-radius:var(--rsm);object-fit:cover;flex-shrink:0">`).join('')}</div>`:''}
+    <div class="nota-foot"><span class="nota-date">${ds}</span>${fotoBadge}${audioBadge}</div>`;
+    list.appendChild(card);
+  });
+}
+
+/* ── SANITÁRIO ── */
+function salvarSanitario(){
+  const tipo=$('san-tipo').value;const lote=$('san-lote').value.trim();
+  const data=$('san-data').value;const intervalo=parseInt($('san-intervalo').value)||0;const obs=$('san-obs').value.trim();
+  if(!data)return;
+  const san=S.getJ('agro_sanitario');
+  san.unshift({id:Date.now(),tipo,lote,data,intervalo,obs,ts:Date.now()});
+  S.setJ('agro_sanitario',san);
+  // Gerar evento no calendário automaticamente
+  if(intervalo>0){
+    const d=new Date(data);d.setDate(d.getDate()+intervalo);
+    const nextData=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const events=S.getJ('agro_events');
+    events.push({id:Date.now()+1,tipo:'sanitario',desc:`📅 Próx. ${tipo}`,lote:lote,data:nextData});
+    S.setJ('agro_events',events);
+  }
+  $('san-lote').value='';$('san-data').value='';$('san-intervalo').value='';$('san-obs').value='';
+  renderSanitario();
+  // feedback
+  const sb=document.createElement('div');sb.className='sbadge success';sb.style='position:fixed;bottom:calc(var(--tab) + var(--sb) + 16px);left:50%;transform:translateX(-50%);z-index:300;min-width:260px;animation:fs .3s ease';
+  sb.innerHTML=`<div class="bdot"></div><div><div class="btxt" style="color:var(--g7)">✅ Registado!</div><div class="bsub">Alerta agendado${intervalo>0?' para daqui a '+intervalo+' dias':''}</div></div>`;
+  document.querySelector('.app').appendChild(sb);setTimeout(()=>sb.remove(),2500);
+}
+function renderSanitario(){
+  const san=S.getJ('agro_sanitario');const list=$('sanitario-list');list.innerHTML='';
+  if(!san.length){list.innerHTML='<div class="hist-empty">Nenhum registro ainda.</div>';return;}
+  san.forEach(s=>{
+    const card=document.createElement('div');card.className='hist-card';
+    const ds=s.data.split('-').reverse().join('/');
+    card.innerHTML=`<div class="hist-head"><span class="hist-type">💉 ${s.tipo}</span><span class="hist-date">${ds}</span></div>
+    <div class="hist-val" style="color:var(--r6)">${s.lote||'Sem lote'}</div>
+    <div class="hist-sub">${s.obs||'—'}${s.intervalo?' · Repete em '+s.intervalo+' dias':''}</div>`;
+    list.appendChild(card);
+  });
+}
+
+/* ── BOOT ── */
+function boot(){
+  addCostLine();applyFarmBranding();renderHistorico();renderAlerts();
+  const today=new Date();$('san-data').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  $('fab-cal').classList.add('hidden');
+  const last=S.get('agro_screen');
+  if(['financeiro','pesagem','calendario','calculadora','anotacoes','sanitario'].includes(last))navigate(last);
+  else navigate('home');
+}
+boot();
+</script>
+</body>
+</html>

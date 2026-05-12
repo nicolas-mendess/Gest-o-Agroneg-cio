@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d3318">
+<title>AgroGestão</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g9:#0d3318;--g7:#1a5c2a;--g5:#2e8b47;--g3:#6dbf82;--g1:#e8f5ec;--g0:#f4fbf6;
+  --a6:#b45309;--a1:#fef3c7;--r6:#dc2626;--r1:#fee2e2;
+  --n9:#111827;--n6:#4b5563;--n4:#9ca3af;--n2:#e5e7eb;--n1:#f3f4f6;--w:#fff;
+  --rsm:10px;--rmd:16px;--rlg:24px;
+  --tab:68px;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:'DM Sans',sans-serif;background:var(--n1);color:var(--n9);display:flex;justify-content:center;align-items:flex-start;-webkit-font-smoothing:antialiased}
+.app{width:100%;max-width:430px;height:100dvh;background:var(--w);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;animation:fs .28s cubic-bezier(.4,0,.2,1)}
+.screen.active{display:flex}
+@keyframes fs{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sbody{padding:16px 16px calc(var(--tab) + var(--sb) + 16px);display:flex;flex-direction:column;gap:14px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.sbody::-webkit-scrollbar{display:none}
+
+/* HERO */
+.hero{background:var(--g9);padding:calc(var(--st) + 28px) 24px 28px;position:relative;overflow:hidden;flex-shrink:0}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero::after{content:'';position:absolute;bottom:-30px;left:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.03)}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--g3);margin-bottom:8px}
+.htitle{font-family:'DM Serif Display',serif;font-size:clamp(26px,7vw,34px);line-height:1.1;color:var(--w);margin-bottom:6px}
+.htitle em{font-style:italic;color:var(--g3)}
+.hsub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
+.farm-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;margin-top:10px;font-size:12px;color:rgba(255,255,255,.8);cursor:pointer;transition:background .2s}
+.farm-badge:active{background:rgba(255,255,255,.2)}
+
+/* SCROLL HOME */
+.hscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px calc(var(--tab) + var(--sb) + 16px);display:flex;flex-direction:column;gap:12px}
+.hscroll::-webkit-scrollbar{display:none}
+.slabel{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--n4);margin-bottom:2px}
+
+.mcard{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--rlg);padding:18px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s,transform .12s;user-select:none;touch-action:manipulation;min-height:76px}
+.mcard:active{transform:scale(.975)}
+.mcard.primary{background:var(--g7);border-color:var(--g7)}
+.mico{width:48px;height:48px;border-radius:14px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.mcard.primary .mico{background:rgba(255,255,255,.15)}
+.minfo{flex:1}
+.mtitle{font-size:15px;font-weight:600;color:var(--n9);margin-bottom:2px}
+.mcard.primary .mtitle{color:var(--w)}
+.mdesc{font-size:12px;color:var(--n4);line-height:1.4}
+.mcard.primary .mdesc{color:rgba(255,255,255,.6)}
+.marr{font-size:20px;color:var(--n2)}
+.mcard.primary .marr{color:rgba(255,255,255,.3)}
+
+/* HISTÓRICO */
+.hist-section{display:flex;flex-direction:column;gap:8px}
+.hist-card{background:var(--n1);border-radius:var(--rmd);padding:12px 14px;cursor:pointer;transition:background .15s}
+.hist-card:active{background:var(--n2)}
+.hist-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.hist-type{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--n4)}
+.hist-date{font-size:10px;color:var(--n4)}
+.hist-val{font-size:14px;font-weight:700;color:var(--n9)}
+.hist-sub{font-size:11px;color:var(--n6);margin-top:2px}
+.hist-empty{font-size:13px;color:var(--n4);text-align:center;padding:20px 0}
+
+/* STAT ROW */
+.strow{display:flex;gap:10px}
+.stpill{flex:1;background:var(--g0);border:1px solid var(--g1);border-radius:var(--rmd);padding:12px;text-align:center}
+.stval{font-size:19px;font-weight:700;color:var(--g7)}
+.stlbl{font-size:10px;color:var(--g5);margin-top:2px}
+
+/* TAB */
+.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--tab) + var(--sb));padding-bottom:var(--sb);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--n2);display:flex;align-items:flex-start;padding-top:10px;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.06)}
+.titem{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 8px;touch-action:manipulation;transition:opacity .15s}
+.titem:active{opacity:.6}
+.tico{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:19px;position:relative}
+.tico::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:3px;background:var(--g7);border-radius:2px;transition:width .2s ease}
+.titem.active .tico::after{width:18px}
+.tlbl{font-size:10px;font-weight:500;color:var(--n4);transition:color .2s}
+.titem.active .tlbl{color:var(--g7);font-weight:600}
+
+/* SCREEN HEADER */
+.shdr{background:var(--g9);padding:calc(var(--st) + 18px) 20px 20px;flex-shrink:0}
+.backbtn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);background:rgba(255,255,255,.1);border:none;border-radius:20px;padding:7px 13px;cursor:pointer;margin-bottom:14px;touch-action:manipulation;transition:background .2s;min-height:40px}
+.backbtn:active{background:rgba(255,255,255,.2)}
+.stitle{font-family:'DM Serif Display',serif;font-size:24px;color:var(--w);margin-bottom:3px}
+.ssub{font-size:11px;color:rgba(255,255,255,.5)}
+
+/* FORM */
+.fgrp{display:flex;flex-direction:column;gap:5px}
+.flbl{font-size:12px;font-weight:600;color:var(--n6);letter-spacing:.04em}
+.iwrap{display:flex;align-items:center;background:var(--n1);border:1.5px solid var(--n2);border-radius:var(--rmd);padding:0 14px;transition:border-color .2s,box-shadow .2s}
+.iwrap:focus-within{border-color:var(--g5);box-shadow:0 0 0 3px rgba(46,139,71,.12);background:var(--w)}
+.iwrap.error{border-color:var(--r6)}
+.ipfx{font-size:13px;font-weight:600;color:var(--n4);margin-right:7px;white-space:nowrap}
+.iwrap input{flex:1;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;color:var(--n9);padding:13px 0;width:100%;min-height:50px}
+.iwrap input::placeholder{color:var(--n4);font-weight:400;font-size:15px}
+.isfx{font-size:13px;color:var(--n4);margin-left:7px;font-weight:500}
+.ferr{font-size:11px;color:var(--r6);font-weight:500;display:none}
+.ferr.visible{display:block}
+
+/* COST LINES */
+.cost-lines{display:flex;flex-direction:column;gap:8px}
+.cost-line{display:flex;gap:8px;align-items:center}
+.cost-line .iwrap{flex:1}
+.cost-line input.cname{font-size:14px;font-weight:500;padding:10px 0;min-height:44px}
+.cost-line input.cval{font-size:16px;font-weight:600;padding:10px 0;min-height:44px}
+.delbtn{width:36px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--r1);border:1px solid #fca5a5;border-radius:var(--rsm);cursor:pointer;flex-shrink:0;color:var(--r6);font-size:18px;transition:background .15s}
+.delbtn:active{background:#fecaca}
+.addbtn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--g0);border:1.5px dashed var(--g3);border-radius:var(--rmd);padding:10px;color:var(--g7);font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;transition:background .15s}
+.addbtn:active{background:var(--g1)}
+
+.ctabtn{background:var(--g7);color:var(--w);border:none;border-radius:var(--rmd);padding:16px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;width:100%;cursor:pointer;letter-spacing:.02em;transition:background .2s,transform .1s;box-shadow:0 4px 14px rgba(26,92,42,.3);min-height:52px;touch-action:manipulation}
+.ctabtn:active{transform:scale(.97);background:var(--g5)}
+
+/* RESULTS */
+.rpanel{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--rlg);overflow:hidden}
+.rpanel.hidden{display:none}
+.rphdr{padding:11px 15px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--n1);color:var(--n6);border-bottom:1px solid var(--n2)}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid var(--n2);font-size:13px}
+.rrow:last-child{border-bottom:none}
+.rrow .rl{color:var(--n6)}
+.rrow .rv{font-weight:700;color:var(--n9)}
+.rrow .rv.grn{color:var(--g5);font-size:19px}
+.rrow .rv.red{color:var(--r6);font-size:19px}
+
+/* PONTO DE EQUILIBRIO */
+.pe-card{background:var(--g9);border-radius:var(--rlg);overflow:hidden}
+.pe-card.hidden{display:none}
+.pe-hdr{padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.pe-title{font-size:12px;font-weight:700;color:var(--w);letter-spacing:.06em;text-transform:uppercase}
+.pe-tag{margin-left:auto;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
+.pe-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}
+.pe-row:last-child{border-bottom:none}
+.pe-row .pl{color:rgba(255,255,255,.6)}
+.pe-row .pv{font-weight:700;color:var(--w)}
+.pe-row .pv.big{font-size:19px;color:var(--g3)}
+.pe-live{font-size:10px;color:rgba(255,255,255,.4);font-style:italic}
+
+/* STATUS */
+.sbadge{border-radius:var(--rmd);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.sbadge.hidden{display:none}
+.sbadge.success{background:var(--g1);border:2px solid var(--g5)}
+.sbadge.danger{background:var(--r1);border:2px solid var(--r6)}
+.sbadge.warning{background:var(--a1);border:2px solid var(--a6)}
+.bdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.success .bdot{background:var(--g5);box-shadow:0 0 0 3px rgba(46,139,71,.2)}
+.danger .bdot{background:var(--r6);box-shadow:0 0 0 3px rgba(220,38,38,.2)}
+.warning .bdot{background:var(--a6);box-shadow:0 0 0 3px rgba(180,83,9,.2)}
+.btxt{font-size:13px;font-weight:700}
+.success .btxt{color:var(--g7)}
+.danger .btxt{color:var(--r6)}
+.warning .btxt{color:var(--a6)}
+.bsub{font-size:11px;color:var(--n6);margin-top:2px}
+
+/* NUTRI */
+.nblock{background:var(--g9);border-radius:var(--rlg);overflow:hidden}
+.nblock.hidden{display:none}
+.nhdr{padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.ntitle{font-size:12px;font-weight:700;color:var(--w);letter-spacing:.06em;text-transform:uppercase}
+.ntag{margin-left:auto;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
+.nrow{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}
+.nrow:last-child{border-bottom:none}
+.nrow .nl{color:rgba(255,255,255,.6)}
+.nrow .nv{font-weight:700;color:var(--w)}
+.nrow .nv.big{font-size:19px;color:var(--g3)}
+
+.reccard{background:var(--n1);border-radius:var(--rmd);padding:12px 14px;display:flex;gap:8px;align-items:flex-start}
+.reccard.hidden{display:none}
+.recico{font-size:16px;flex-shrink:0}
+.rectxt{font-size:12px;color:var(--n6);line-height:1.6}
+.rectxt strong{color:var(--n9)}
+
+/* MODAL */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:200;animation:mfade .2s ease}
+.modal-overlay.hidden{display:none}
+@keyframes mfade{from{opacity:0}to{opacity:1}}
+.modal{background:var(--w);border-radius:var(--rlg) var(--rlg) 0 0;padding:24px 20px calc(var(--sb) + 24px);width:100%;animation:mslide .25s cubic-bezier(.4,0,.2,1)}
+@keyframes mslide{from{transform:translateY(40px)}to{transform:translateY(0)}}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--n9);margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--n4);margin-bottom:20px}
+.modal-btns{display:flex;gap:10px;margin-top:16px}
+.mbtn{flex:1;padding:13px;border:none;border-radius:var(--rmd);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation;transition:opacity .15s}
+.mbtn:active{opacity:.8}
+.mbtn.primary{background:var(--g7);color:var(--w);box-shadow:0 4px 12px rgba(26,92,42,.25)}
+.mbtn.ghost{background:var(--n1);color:var(--n6);border:1.5px solid var(--n2)}
+
+/* RESPONSIVE DESKTOP */
+@media(min-width:430px){
+  body{align-items:center;min-height:100vh;padding:24px 0}
+  .app{border-radius:36px;height:88vh;max-height:900px;box-shadow:0 12px 40px rgba(0,0,0,.14)}
+  .tabbar{position:absolute;border-radius:0 0 36px 36px}
+}
+@media(min-width:900px){
+  body{background:#e8ede9;padding:32px}
+  .app{max-width:860px;height:90vh}
+  .sbody,.hscroll{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+  .sbody .ctabtn,.sbody .fgrp:has(#ganhos-total),.hscroll .strow{grid-column:1/-1}
+  .strow{grid-column:1/-1}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ HOME ═══ -->
+<div class="screen active" id="screen-home">
+  <div class="hero">
+    <div class="eyebrow">🌾 Sistema de Gestão Rural</div>
+    <h1 class="htitle">Gestão<br><em>Agronegócios</em></h1>
+    <p class="hsub" id="home-safra">Pecuária de corte · Safra 2025</p>
+    <div class="farm-badge" id="farm-badge-btn" onclick="openFarmModal()">
+      <span>🏡</span>
+      <span id="farm-badge-label">Configurar Fazenda</span>
+    </div>
+  </div>
+  <div class="hscroll">
+    <p class="slabel">Módulos</p>
+    <div class="mcard primary" onclick="navigate('financeiro')">
+      <div class="mico">💰</div>
+      <div class="minfo">
+        <div class="mtitle">Gestão Financeira</div>
+        <div class="mdesc">Ganhos, múltiplos custos e resultado</div>
+      </div>
+      <div class="marr">›</div>
+    </div>
+    <div class="mcard" onclick="navigate('pesagem')">
+      <div class="mico">⚖️</div>
+      <div class="minfo">
+        <div class="mtitle">Pesagem e Nutrição</div>
+        <div class="mdesc">Défice de peso, ponto de equilíbrio</div>
+      </div>
+      <div class="marr">›</div>
+    </div>
+    <div class="strow">
+      <div class="stpill"><div class="stval">CA</div><div class="stlbl">Conv. Alimentar 7,0</div></div>
+      <div class="stpill"><div class="stval">v3.0</div><div class="stlbl">AgroGestão</div></div>
+    </div>
+    <p class="slabel">Histórico Recente</p>
+    <div class="hist-section" id="hist-list">
+      <div class="hist-empty" id="hist-empty">Nenhum cálculo registado ainda.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FINANCEIRO ═══ -->
+<div class="screen" id="screen-financeiro">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Gestão Financeira</h2>
+    <p class="ssub">Múltiplos custos · resultado em tempo real</p>
+  </div>
+  <div class="sbody">
+    <div class="fgrp">
+      <label class="flbl">📈 Ganhos / Receita Total</label>
+      <div class="iwrap" id="wrap-ganhos">
+        <span class="ipfx">R$</span>
+        <input type="number" id="fin-ganhos" placeholder="0,00" min="0" step="0.01" inputmode="decimal" oninput="atualizarPE()">
+      </div>
+      <span class="ferr" id="err-ganhos">Informe um valor válido.</span>
+    </div>
+
+    <div class="fgrp">
+      <label class="flbl">📉 Custos</label>
+      <div class="cost-lines" id="cost-lines"></div>
+      <div class="addbtn" onclick="addCostLine()">＋ Adicionar custo</div>
+    </div>
+
+    <div class="fgrp">
+      <label class="flbl">🎯 Preço de venda por @ (arroba)</label>
+      <div class="iwrap" id="wrap-parr">
+        <span class="ipfx">R$</span>
+        <input type="number" id="fin-parr" placeholder="185,00" min="0" step="0.10" inputmode="decimal" oninput="atualizarPE()">
+        <span class="isfx">/ @</span>
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">⚖️ Peso total em arrobas (@)</label>
+      <div class="iwrap" id="wrap-arrobas">
+        <input type="number" id="fin-arrobas" placeholder="16,5" min="0" step="0.1" inputmode="decimal" oninput="atualizarPE()">
+        <span class="isfx">@</span>
+      </div>
+    </div>
+
+    <button class="ctabtn" onclick="calcularFinanceiro()">Calcular Resultado</button>
+
+    <!-- Ponto de equilíbrio live -->
+    <div class="pe-card" id="pe-live-card">
+      <div class="pe-hdr"><span>⚡</span><span class="pe-title">Ponto de Equilíbrio</span><span class="pe-tag">Ao vivo</span></div>
+      <div class="pe-row"><span class="pl">Custo total acumulado</span><span class="pv" id="pe-custo-total">—</span></div>
+      <div class="pe-row"><span class="pl">Preço mínimo p/ cobrir custos</span><span class="pv big" id="pe-preco-min">—</span></div>
+      <div class="pe-row"><span class="pl">Margem atual</span><span class="pv" id="pe-margem">—</span></div>
+      <div class="pe-row"><span class="pl pe-live">Actualização automática ao digitar</span><span></span></div>
+    </div>
+
+    <div class="rpanel hidden" id="fin-resultado">
+      <div class="rphdr">Resumo Financeiro</div>
+      <div class="rrow"><span class="rl">Receita Total</span><span class="rv" id="fin-r-ganhos">—</span></div>
+      <div class="rrow"><span class="rl">Custos Totais</span><span class="rv" id="fin-r-custos">—</span></div>
+      <div class="rrow"><span class="rl" style="font-weight:700;color:#111">Lucro / Prejuízo</span><span class="rv" id="fin-r-lucro">—</span></div>
+    </div>
+    <div class="sbadge hidden" id="fin-status">
+      <div class="bdot"></div>
+      <div><div class="btxt" id="fin-status-text"></div><div class="bsub" id="fin-status-sub"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PESAGEM ═══ -->
+<div class="screen" id="screen-pesagem">
+  <div class="shdr">
+    <button class="backbtn" onclick="navigate('home')">← Início</button>
+    <h2 class="stitle">Pesagem e Nutrição</h2>
+    <p class="ssub">Peso, plano alimentar e equilíbrio</p>
+  </div>
+  <div class="sbody">
+    <div class="fgrp">
+      <label class="flbl">🎯 Peso Ideal / Meta</label>
+      <div class="iwrap" id="wrap-ideal">
+        <input type="number" id="pes-ideal" placeholder="450" min="0" step="0.1" inputmode="decimal" oninput="atualizarPEPes()">
+        <span class="isfx">kg</span>
+      </div>
+      <span class="ferr" id="err-ideal">Informe o peso ideal em kg.</span>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">⚖️ Peso Atual na Balança</label>
+      <div class="iwrap" id="wrap-atual">
+        <input type="number" id="pes-atual" placeholder="380" min="0" step="0.1" inputmode="decimal" oninput="atualizarPEPes()">
+        <span class="isfx">kg</span>
+      </div>
+      <span class="ferr" id="err-atual">Informe o peso atual em kg.</span>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">🌽 Preço do KG de Ração</label>
+      <div class="iwrap" id="wrap-preco">
+        <span class="ipfx">R$</span>
+        <input type="number" id="pes-preco" placeholder="3,50" min="0" step="0.10" inputmode="decimal" oninput="atualizarPEPes()">
+      </div>
+      <span class="ferr" id="err-preco">Informe o preço do kg de ração.</span>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">💲 Preço esperado de venda por @</label>
+      <div class="iwrap" id="wrap-pvenda">
+        <span class="ipfx">R$</span>
+        <input type="number" id="pes-pvenda" placeholder="185,00" min="0" step="0.10" inputmode="decimal" oninput="atualizarPEPes()">
+        <span class="isfx">/ @</span>
+      </div>
+    </div>
+
+    <button class="ctabtn" onclick="calcularPesagem()">Verificar Peso</button>
+
+    <!-- PE pesagem live -->
+    <div class="pe-card" id="pe-pes-card">
+      <div class="pe-hdr"><span>⚡</span><span class="pe-title">Equilíbrio de Engorda</span><span class="pe-tag">Ao vivo</span></div>
+      <div class="pe-row"><span class="pl">Custo estimado de engorda</span><span class="pv" id="ppe-custo">—</span></div>
+      <div class="pe-row"><span class="pl">Arrobas ganhas (@ = 15 kg)</span><span class="pv" id="ppe-arrobas">—</span></div>
+      <div class="pe-row"><span class="pl">Preço mínimo por @ p/ equilibrar</span><span class="pv big" id="ppe-preco-min">—</span></div>
+      <div class="pe-row"><span class="pl">Resultado esperado</span><span class="pv" id="ppe-resultado">—</span></div>
+      <div class="pe-row"><span class="pl pe-live">Actualização automática ao digitar</span><span></span></div>
+    </div>
+
+    <div class="sbadge hidden" id="pes-status">
+      <div class="bdot"></div>
+      <div><div class="btxt" id="pes-status-text"></div><div class="bsub" id="pes-status-sub"></div></div>
+    </div>
+    <div class="nblock hidden" id="nutri-panel">
+      <div class="nhdr"><span>🌽</span><span class="ntitle">Plano de Nutrição</span><span class="ntag">Automático</span></div>
+      <div class="nrow"><span class="nl">Défice de peso</span><span class="nv" id="nutri-defice">—</span></div>
+      <div class="nrow"><span class="nl">Conversão Alimentar (CA)</span><span class="nv">7,0</span></div>
+      <div class="nrow"><span class="nl">KG de ração necessário</span><span class="nv" id="nutri-racao">—</span></div>
+      <div class="nrow"><span class="nl">Preço por KG</span><span class="nv" id="nutri-preco-kg">—</span></div>
+      <div class="nrow"><span class="nl">Custo total estimado</span><span class="nv big" id="nutri-custo">—</span></div>
+    </div>
+    <div class="reccard hidden" id="nutri-rec">
+      <div class="recico">📋</div>
+      <div class="rectxt"><strong>Recomendação:</strong> acompanhar a dieta conforme o plano e pesar novamente em <strong>30 dias</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB BAR ═══ -->
+<nav class="tabbar" id="tabbar">
+  <div class="titem active" id="tab-home" onclick="navigate('home')">
+    <div class="tico">🏠</div><div class="tlbl">Início</div>
+  </div>
+  <div class="titem" id="tab-financeiro" onclick="navigate('financeiro')">
+    <div class="tico">💰</div><div class="tlbl">Financeiro</div>
+  </div>
+  <div class="titem" id="tab-pesagem" onclick="navigate('pesagem')">
+    <div class="tico">⚖️</div><div class="tlbl">Pesagem</div>
+  </div>
+</nav>
+
+<!-- ═══ MODAL FAZENDA ═══ -->
+<div class="modal-overlay hidden" id="farm-modal">
+  <div class="modal">
+    <div class="modal-title">Sua Fazenda</div>
+    <div class="modal-sub">Personalize o app com o nome da fazenda e do produtor</div>
+    <div class="fgrp" style="margin-bottom:12px">
+      <label class="flbl">🏡 Nome da Fazenda</label>
+      <div class="iwrap"><input type="text" id="farm-name" placeholder="Ex: Fazenda Santa Rita" maxlength="40"></div>
+    </div>
+    <div class="fgrp" style="margin-bottom:12px">
+      <label class="flbl">👤 Nome do Produtor</label>
+      <div class="iwrap"><input type="text" id="farm-owner" placeholder="Ex: João da Silva" maxlength="40"></div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">📅 Safra / Período</label>
+      <div class="iwrap"><input type="text" id="farm-safra" placeholder="Ex: Safra 2025" maxlength="20"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn ghost" onclick="closeFarmModal()">Cancelar</button>
+      <button class="mbtn primary" onclick="saveFarm()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+const $ = id => document.getElementById(id);
+const BRL = v => (+v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const KG  = v => (+v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg';
+
+/* ── STORAGE (wrapper seguro) ── */
+const S = {
+  get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+
+/* ── NAVIGATE ── */
+function navigate(to){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-'+to).classList.add('active');
+  document.querySelectorAll('.titem').forEach(t=>t.classList.remove('active'));
+  const t=$('tab-'+to);if(t)t.classList.add('active');
+  const body=document.querySelector('#screen-'+to+' .sbody, #screen-'+to+' .hscroll');
+  if(body)body.scrollTo(0,0);
+  S.set('agro_screen',to);
+  if(to==='home')renderHistorico();
+}
+
+/* ── FAZENDA ── */
+function openFarmModal(){
+  const fn=S.get('farm_name')||'';const fo=S.get('farm_owner')||'';const fs=S.get('farm_safra')||'';
+  $('farm-name').value=fn;$('farm-owner').value=fo;$('farm-safra').value=fs;
+  $('farm-modal').classList.remove('hidden');
+}
+function closeFarmModal(){$('farm-modal').classList.add('hidden')}
+function saveFarm(){
+  const fn=$('farm-name').value.trim();
+  const fo=$('farm-owner').value.trim();
+  const fs=$('farm-safra').value.trim();
+  S.set('farm_name',fn);S.set('farm_owner',fo);S.set('farm_safra',fs);
+  closeFarmModal();
+  applyFarmBranding();
+}
+function applyFarmBranding(){
+  const fn=S.get('farm_name')||'';
+  const fo=S.get('farm_owner')||'';
+  const fs=S.get('farm_safra')||'Pecuária de corte · Safra 2025';
+  $('farm-badge-label').textContent=fn||(fo?fo:'Configurar Fazenda');
+  $('home-safra').textContent=fs||'Pecuária de corte · Safra 2025';
+}
+
+/* ── COST LINES ── */
+let costId=0;
+function addCostLine(name='',val=''){
+  const id='cl-'+costId++;
+  const div=document.createElement('div');
+  div.className='cost-line';div.id=id;
+  div.innerHTML=`
+    <div class="iwrap" style="flex:1.6"><input type="text" class="cname" placeholder="Descrição (ex: Ração)" value="${name}" maxlength="30" oninput="atualizarPE()"></div>
+    <div class="iwrap" style="flex:1"><span class="ipfx">R$</span><input type="number" class="cval" placeholder="0,00" min="0" step="0.10" inputmode="decimal" value="${val}" oninput="atualizarPE()"></div>
+    <div class="delbtn" onclick="removeCostLine('${id}')">✕</div>
+  `;
+  $('cost-lines').appendChild(div);
+}
+function removeCostLine(id){
+  const el=$(id);if(el)el.remove();
+  atualizarPE();
+}
+function getCostLines(){
+  const lines=[...document.querySelectorAll('.cost-line')];
+  let total=0;
+  const items=[];
+  lines.forEach(l=>{
+    const v=parseFloat(l.querySelector('.cval').value)||0;
+    const n=l.querySelector('.cname').value.trim()||'Custo';
+    total+=v;items.push({n,v});
+  });
+  return{total,items};
+}
+
+/* ── PE FINANCEIRO (live) ── */
+function atualizarPE(){
+  const ganhos=parseFloat($('fin-ganhos').value)||0;
+  const parr=parseFloat($('fin-parr').value)||0;
+  const arrobas=parseFloat($('fin-arrobas').value)||0;
+  const {total:custoTotal}=getCostLines();
+
+  $('pe-custo-total').textContent=custoTotal>0?BRL(custoTotal):'—';
+
+  if(arrobas>0&&custoTotal>0){
+    const precoMin=custoTotal/arrobas;
+    $('pe-preco-min').textContent=BRL(precoMin)+' / @';
+    $('pe-preco-min').className='pv big';
+
+    if(parr>0){
+      const margem=((parr-precoMin)/precoMin)*100;
+      const clr=margem>=0?'color:var(--g3)':'color:#fca5a5';
+      $('pe-margem').innerHTML=`<span style="${clr}">${margem>=0?'+':''}${margem.toFixed(1)}%</span>`;
+    } else {
+      $('pe-margem').textContent='—';
+    }
+  } else if(arrobas===0&&custoTotal>0){
+    $('pe-preco-min').textContent='Informe as arrobas';
+    $('pe-preco-min').className='pv';
+    $('pe-margem').textContent='—';
+  } else {
+    $('pe-preco-min').textContent='—';
+    $('pe-preco-min').className='pv big';
+    $('pe-margem').textContent='—';
+  }
+}
+
+/* ── PE PESAGEM (live) ── */
+function atualizarPEPes(){
+  const ideal=parseFloat($('pes-ideal').value)||0;
+  const atual=parseFloat($('pes-atual').value)||0;
+  const preco=parseFloat($('pes-preco').value)||0;
+  const pvenda=parseFloat($('pes-pvenda').value)||0;
+  const CA=7.0;
+
+  if(ideal>0&&atual>0&&atual<ideal&&preco>0){
+    const defice=ideal-atual;
+    const racao=defice*CA;
+    const custo=racao*preco;
+    const arrobas=defice/15;
+    const precoMin=arrobas>0?custo/arrobas:0;
+
+    $('ppe-custo').textContent=BRL(custo);
+    $('ppe-arrobas').textContent=arrobas.toFixed(2)+' @';
+    $('ppe-preco-min').textContent=precoMin>0?BRL(precoMin)+' / @':'—';
+
+    if(pvenda>0&&precoMin>0){
+      const resultado=(pvenda-precoMin)*arrobas;
+      const clr=resultado>=0?'color:var(--g3)':'color:#fca5a5';
+      $('ppe-resultado').innerHTML=`<span style="${clr}">${BRL(resultado)}</span>`;
+    } else {
+      $('ppe-resultado').textContent='—';
+    }
+  } else {
+    ['ppe-custo','ppe-arrobas','ppe-preco-min','ppe-resultado'].forEach(id=>$(id).textContent='—');
+  }
+}
+
+/* ── CÁLCULO FINANCEIRO ── */
+function calcularFinanceiro(){
+  const ganhos=parseFloat($('fin-ganhos').value);
+  let valid=true;
+  $('wrap-ganhos').classList.remove('error');$('err-ganhos').classList.remove('visible');
+  if(isNaN(ganhos)||ganhos<0){$('wrap-ganhos').classList.add('error');$('err-ganhos').classList.add('visible');valid=false;}
+  if(!valid)return;
+
+  const {total:custoTotal}=getCostLines();
+  const lucro=ganhos-custoTotal;
+
+  $('fin-r-ganhos').textContent=BRL(ganhos);
+  $('fin-r-custos').textContent=BRL(custoTotal);
+  const el=$('fin-r-lucro');
+  el.textContent=BRL(Math.abs(lucro));
+  el.className='rv '+(lucro>=0?'grn':'red');
+  $('fin-resultado').classList.remove('hidden');
+
+  const s=$('fin-status');
+  s.className='sbadge '+(lucro>=0?'success':'danger');
+  $('fin-status-text').textContent=lucro>=0?'✅ OPERAÇÃO SAUDÁVEL':'❌ PREJUÍZO';
+  $('fin-status-sub').textContent=lucro>=0?'Resultado positivo confirmado.':'Reveja os custos e a estratégia de venda.';
+  s.classList.remove('hidden');
+
+  saveHistorico({
+    tipo:'Financeiro',
+    resumo:`Receita ${BRL(ganhos)} · Custos ${BRL(custoTotal)}`,
+    resultado:`${lucro>=0?'+':''}${BRL(lucro)}`,
+    ok:lucro>=0
+  });
+}
+
+/* ── CÁLCULO PESAGEM ── */
+function calcularPesagem(){
+  const ideal=parseFloat($('pes-ideal').value);
+  const atual=parseFloat($('pes-atual').value);
+  const preco=parseFloat($('pes-preco').value);
+  let valid=true;
+  [['wrap-ideal','err-ideal'],['wrap-atual','err-atual'],['wrap-preco','err-preco']].forEach(([w,e])=>{
+    $(w).classList.remove('error');$(e).classList.remove('visible');
+  });
+  if(isNaN(ideal)||ideal<=0){$('wrap-ideal').classList.add('error');$('err-ideal').classList.add('visible');valid=false;}
+  if(isNaN(atual)||atual<=0){$('wrap-atual').classList.add('error');$('err-atual').classList.add('visible');valid=false;}
+  if(isNaN(preco)||preco<=0){$('wrap-preco').classList.add('error');$('err-preco').classList.add('visible');valid=false;}
+  if(!valid)return;
+
+  const s=$('pes-status');const nutri=$('nutri-panel');const rec=$('nutri-rec');
+
+  if(atual>=ideal){
+    s.className='sbadge success';
+    $('pes-status-text').textContent='✅ Animal no peso ideal';
+    $('pes-status-sub').textContent=`Peso atual (${KG(atual)}) atingiu a meta de ${KG(ideal)}.`;
+    s.classList.remove('hidden');nutri.classList.add('hidden');rec.classList.add('hidden');
+    saveHistorico({tipo:'Pesagem',resumo:`Atual ${KG(atual)} · Meta ${KG(ideal)}`,resultado:'Peso certificado ✓',ok:true});
+  } else {
+    const CA=7.0;const defice=ideal-atual;const racao=defice*CA;const custo=racao*preco;
+    s.className='sbadge warning';
+    $('pes-status-text').textContent='⚠️ Animal abaixo do peso';
+    $('pes-status-sub').textContent=`Défice de ${KG(defice)} — nutrição acionada.`;
+    s.classList.remove('hidden');
+    $('nutri-defice').textContent=KG(defice);
+    $('nutri-racao').textContent=KG(racao);
+    $('nutri-preco-kg').textContent=BRL(preco);
+    $('nutri-custo').textContent=BRL(custo);
+    nutri.classList.remove('hidden');rec.classList.remove('hidden');
+    saveHistorico({tipo:'Pesagem',resumo:`Atual ${KG(atual)} · Défice ${KG(defice)}`,resultado:`Ração: ${BRL(custo)}`,ok:false});
+  }
+}
+
+/* ── HISTÓRICO (últimos 5) ── */
+function saveHistorico(item){
+  let hist=[];
+  try{hist=JSON.parse(S.get('agro_hist')||'[]')}catch(e){}
+  hist.unshift({...item,ts:Date.now()});
+  hist=hist.slice(0,5);
+  S.set('agro_hist',JSON.stringify(hist));
+}
+function renderHistorico(){
+  let hist=[];
+  try{hist=JSON.parse(S.get('agro_hist')||'[]')}catch(e){}
+  const list=$('hist-list');const empty=$('hist-empty');
+  list.querySelectorAll('.hist-card').forEach(c=>c.remove());
+  if(!hist.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  hist.forEach(h=>{
+    const d=new Date(h.ts);
+    const ds=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+ ' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const card=document.createElement('div');
+    card.className='hist-card';
+    card.innerHTML=`
+      <div class="hist-head">
+        <span class="hist-type">${h.tipo==='Financeiro'?'💰':'⚖️'} ${h.tipo}</span>
+        <span class="hist-date">${ds}</span>
+      </div>
+      <div class="hist-val" style="color:${h.ok?'var(--g5)':'var(--r6)'}">${h.resultado}</div>
+      <div class="hist-sub">${h.resumo}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+/* ── BOOT ── */
+function boot(){
+  addCostLine();
+  applyFarmBranding();
+  renderHistorico();
+  const last=S.get('agro_screen');
+  if(['financeiro','pesagem'].includes(last))navigate(last);
+  else navigate('home');
+  // PE live cards visíveis por padrão
+  document.querySelectorAll('.pe-card').forEach(c=>c.classList.remove('hidden'));
+}
+boot();
+</script>
+</body>
+</html>

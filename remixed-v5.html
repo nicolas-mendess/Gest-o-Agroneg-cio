@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d3318">
+<title>AgroGestão v6.0</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g9:#0d3318;--g7:#1a5c2a;--g5:#2e8b47;--g3:#6dbf82;--g1:#e8f5ec;--g0:#f4fbf6;
+  --a6:#b45309;--a1:#fef3c7;--r6:#dc2626;--r1:#fee2e2;--b6:#1d4ed8;--b1:#dbeafe;
+  --n9:#111827;--n7:#374151;--n6:#4b5563;--n4:#9ca3af;--n2:#e5e7eb;--n1:#f3f4f6;--w:#fff;
+  --radius:16px;--radius-lg:24px;--radius-sm:10px;
+  --shadow:0 2px 8px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.1);--shadow-lg:0 12px 40px rgba(0,0,0,.16);
+  --sidebar-w:248px;--tab-h:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--n1);color:var(--n9);min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ══ AUTH SCREEN ══ */
+.auth-screen{position:fixed;inset:0;background:var(--g9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:24px;overflow-y:auto}
+.auth-screen.hidden{display:none}
+.auth-logo{font-family:'DM Serif Display',serif;font-size:36px;color:var(--w);text-align:center;margin-bottom:6px}
+.auth-logo em{font-style:italic;color:var(--g3)}
+.auth-tagline{font-size:13px;color:rgba(255,255,255,.45);text-align:center;margin-bottom:40px}
+.auth-card{background:var(--w);border-radius:var(--radius-lg);padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.auth-tabs{display:flex;background:var(--n1);border-radius:var(--radius-sm);padding:3px;margin-bottom:22px;gap:3px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;color:var(--n4);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s}
+.auth-tab.active{background:var(--w);color:var(--g7);box-shadow:var(--shadow)}
+.auth-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--n9);margin-bottom:4px}
+.auth-sub{font-size:12px;color:var(--n4);margin-bottom:20px;line-height:1.5}
+.auth-form{display:flex;flex-direction:column;gap:12px}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:6px 0}
+.auth-divider span{font-size:11px;color:var(--n4);white-space:nowrap}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--n2)}
+.guest-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:var(--g0);border:1.5px solid var(--g1);border-radius:var(--radius);font-size:13px;font-weight:600;color:var(--g7);cursor:pointer;transition:background .15s;width:100%}
+.guest-btn:hover{background:var(--g1)}
+.guest-note{font-size:11px;color:var(--n4);text-align:center;margin-top:8px;line-height:1.5}
+/* Guest upgrade banner */
+.upgrade-banner{background:var(--g7);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .15s;margin-bottom:4px}
+.upgrade-banner:hover{background:var(--g5)}
+.upgrade-banner.hidden{display:none}
+.ub-ico{font-size:20px;flex-shrink:0}
+.ub-text{flex:1}
+.ub-title{font-size:13px;font-weight:700;color:var(--w)}
+.ub-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px}
+.ub-arr{font-size:18px;color:rgba(255,255,255,.4)}
+/* User profile chip */
+.user-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.08);border-radius:var(--radius);cursor:pointer;transition:background .15s;margin-bottom:12px}
+.user-chip:hover{background:rgba(255,255,255,.14)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--g9);flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-plan{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.user-signout{font-size:11px;color:rgba(255,255,255,.3);cursor:pointer;padding:4px;transition:color .15s;white-space:nowrap}
+.user-signout:hover{color:var(--r6)}
+/* Sync indicator */
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--g3);flex-shrink:0}
+.sync-dot.offline{background:var(--a6)}
+.sync-dot.syncing{background:var(--b6);animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+/* Protected badge */
+.lock-badge{display:inline-flex;align-items:center;gap:4px;background:var(--b1);border:1px solid #bfdbfe;border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--b6)}
+/* Feature gate overlay */
+.gate-overlay{position:absolute;inset:0;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10;padding:20px;text-align:center}
+.gate-overlay.hidden{display:none}
+.gate-ico{font-size:32px}
+.gate-title{font-size:15px;font-weight:700;color:var(--n9)}
+.gate-sub{font-size:12px;color:var(--n6);line-height:1.5}
+
+/* ══ SHELL ══ */
+.shell{display:flex;min-height:100dvh}
+.sidebar{display:none;width:var(--sidebar-w);background:var(--g9);flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:200;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.sb-brand{padding:24px 18px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-brand-name{font-family:'DM Serif Display',serif;font-size:20px;color:var(--w)}
+.sb-brand-name em{font-style:italic;color:var(--g3)}
+.sb-farm-lbl{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;cursor:pointer;transition:color .15s}
+.sb-farm-lbl:hover{color:rgba(255,255,255,.7)}
+.sb-nav{padding:14px 10px;flex:1}
+.sb-sec{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 8px;margin-bottom:5px;margin-top:12px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--radius-sm);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;position:relative}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.sb-item.active{background:rgba(255,255,255,.12);color:var(--w);font-weight:600}
+.sb-item.locked{opacity:.5}
+.sb-item.locked::after{content:'🔒';position:absolute;right:10px;font-size:11px}
+.si{font-size:16px;flex-shrink:0}
+.sb-bottom{padding:14px 10px 20px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-sync{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(255,255,255,.35);padding:6px 8px;margin-bottom:8px}
+
+.main{flex:1;display:flex;flex-direction:column;min-height:100dvh}
+.topbar{display:none;height:58px;background:var(--w);border-bottom:1px solid var(--n2);padding:0 24px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:150;box-shadow:var(--shadow)}
+.tb-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--n9)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-user{display:flex;align-items:center;gap:7px;padding:6px 12px;background:var(--n1);border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600;color:var(--n7)}
+.tb-user:hover{background:var(--n2)}
+.tb-avatar{width:26px;height:26px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--g9)}
+.tb-sync{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)}
+
+.mobile-hero{background:var(--g9);padding:calc(env(safe-area-inset-top)+18px) 18px 20px;position:relative;overflow:hidden;flex-shrink:0}
+.mobile-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.03)}
+.hero-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.hero-left{flex:1}
+.hero-eyebrow{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--g3);margin-bottom:5px}
+.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(20px,5vw,26px);line-height:1.1;color:var(--w);margin-bottom:3px}
+.hero-title em{font-style:italic;color:var(--g3)}
+.hero-sub{font-size:11px;color:rgba(255,255,255,.45);margin-bottom:10px}
+.hero-user-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:6px 10px;cursor:pointer;transition:background .15s;flex-shrink:0}
+.hero-user-btn:active{background:rgba(255,255,255,.2)}
+.hu-avatar{width:28px;height:28px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--g9);flex-shrink:0}
+.hu-name{font-size:11px;font-weight:600;color:var(--w);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.page{display:none;flex:1;padding:14px;overflow-y:auto}
+.page.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pi{max-width:1200px;margin:0 auto}
+
+/* ══ BOTTOM NAV ══ */
+.bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--n2);z-index:190;box-shadow:0 -4px 20px rgba(0,0,0,.05)}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:6px 4px 0;transition:opacity .15s}
+.bn-item:active{opacity:.6}
+.bn-ico{font-size:20px;position:relative}
+.bn-ico::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--g7);border-radius:2px;transition:width .2s}
+.bn-item.active .bn-ico::after{width:16px}
+.bn-lbl{font-size:9px;font-weight:500;color:var(--n4)}
+.bn-item.active .bn-lbl{color:var(--g7);font-weight:700}
+.bn-badge{position:absolute;top:-4px;right:-7px;min-width:15px;height:15px;background:var(--r6);border-radius:20px;font-size:8px;color:var(--w);font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px}
+.bn-badge.hidden{display:none}
+.fab{position:fixed;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 14px);right:16px;width:46px;height:46px;background:var(--g7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--w);cursor:pointer;box-shadow:0 4px 14px rgba(26,92,42,.4);z-index:180}
+.fab:active{transform:scale(.9)}
+.fab.hidden{display:none}
+
+/* ══ GRID ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* ══ CARDS ══ */
+.card{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);position:relative}
+.card-hdr{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--n2)}
+.card-title{font-size:12px;font-weight:700;color:var(--n7);letter-spacing:.04em;text-transform:uppercase}
+.card-body{padding:14px}
+.stat-card{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat-card.green{background:var(--g0);border-color:var(--g1)}
+.stat-card.red{background:var(--r1);border-color:#fecaca}
+.stat-card.amber{background:var(--a1);border-color:#fde68a}
+.stat-card.blue{background:var(--b1);border-color:#bfdbfe}
+.sc-ico{font-size:20px;margin-bottom:6px}
+.sc-val{font-size:20px;font-weight:700;color:var(--n9);line-height:1}
+.sc-val.green{color:var(--g5)}
+.sc-val.red{color:var(--r6)}
+.sc-val.amber{color:var(--a6)}
+.sc-lbl{font-size:10px;color:var(--n4);margin-top:3px;font-weight:500}
+.mod-card{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--radius-lg);padding:14px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s;min-height:68px;position:relative;overflow:hidden}
+.mod-card:hover{border-color:var(--g3);box-shadow:var(--shadow-md)}
+.mod-card:active{transform:scale(.975)}
+.mod-card.primary{background:var(--g7);border-color:var(--g7)}
+.mod-card.primary:hover{background:var(--g5)}
+.mod-ico{width:42px;height:42px;border-radius:12px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.mod-card.primary .mod-ico{background:rgba(255,255,255,.15)}
+.mod-info{flex:1;min-width:0}
+.mod-title{font-size:13px;font-weight:600;color:var(--n9)}
+.mod-card.primary .mod-title{color:var(--w)}
+.mod-desc{font-size:11px;color:var(--n4);margin-top:2px}
+.mod-card.primary .mod-desc{color:rgba(255,255,255,.6)}
+.mod-arr{font-size:16px;color:var(--n2)}
+.mod-card.primary .mod-arr{color:rgba(255,255,255,.3)}
+
+/* ══ ALERT ══ */
+.alert-item{display:flex;align-items:center;gap:8px;border-radius:var(--radius);padding:10px 12px;cursor:pointer;font-size:12px;background:var(--a1);border:1px solid #fde68a}
+.alert-item.red{background:var(--r1);border-color:#fecaca}
+.alert-item.green{background:var(--g0);border-color:var(--g1)}
+.al-dot{width:7px;height:7px;border-radius:50%;background:var(--a6);flex-shrink:0}
+.alert-item.red .al-dot{background:var(--r6)}
+.alert-item.green .al-dot{background:var(--g5)}
+.al-txt{flex:1;font-weight:600;color:var(--a6)}
+.alert-item.red .al-txt{color:var(--r6)}
+.alert-item.green .al-txt{color:var(--g7)}
+.al-date{font-size:10px;color:var(--n4)}
+
+/* ══ FORM ══ */
+.slbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--n4);display:block;margin-bottom:7px}
+.fgrp{display:flex;flex-direction:column;gap:4px}
+.flbl{font-size:12px;font-weight:600;color:var(--n6)}
+.iwrap{display:flex;align-items:center;background:var(--n1);border:1.5px solid var(--n2);border-radius:var(--radius);padding:0 12px;transition:border-color .2s,box-shadow .2s}
+.iwrap:focus-within{border-color:var(--g5);box-shadow:0 0 0 3px rgba(46,139,71,.1);background:var(--w)}
+.iwrap.error{border-color:var(--r6)}
+.ipfx{font-size:12px;font-weight:600;color:var(--n4);margin-right:6px;white-space:nowrap}
+.iwrap input,.iwrap select,.iwrap textarea{flex:1;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--n9);padding:12px 0;min-height:46px;width:100%}
+.iwrap input::placeholder,.iwrap textarea::placeholder{color:var(--n4);font-weight:400;font-size:13px}
+.iwrap textarea{resize:none;min-height:76px;padding:10px 0;font-size:13px;font-weight:400}
+.iwrap select{font-weight:500;font-size:13px;cursor:pointer}
+.isfx{font-size:12px;color:var(--n4);margin-left:6px;font-weight:500;white-space:nowrap}
+.ferr{font-size:10px;color:var(--r6);font-weight:500;display:none}
+.ferr.visible{display:block}
+.frow{display:grid;gap:10px}
+
+/* ══ BUTTONS ══ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--radius);padding:12px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;min-height:46px;touch-action:manipulation;white-space:nowrap;width:auto}
+.btn:active{transform:scale(.97)}
+.btn-full{width:100%}
+.btn-primary{background:var(--g7);color:var(--w);box-shadow:0 4px 12px rgba(26,92,42,.2)}
+.btn-primary:hover{background:var(--g5)}
+.btn-ghost{background:var(--n1);color:var(--n6);border:1.5px solid var(--n2)}
+.btn-ghost:hover{background:var(--n2)}
+.btn-sm{padding:8px 14px;font-size:12px;min-height:36px}
+.btn-link{background:none;color:var(--g7);font-size:13px;font-weight:600;padding:4px 0;min-height:auto;border-bottom:1.5px solid transparent}
+.btn-link:hover{border-bottom-color:var(--g3)}
+
+/* ══ COST LINES ══ */
+.cost-line{display:flex;gap:7px;align-items:center}
+.delbtn{width:32px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--r1);border:1px solid #fecaca;border-radius:var(--radius-sm);cursor:pointer;color:var(--r6);font-size:14px;flex-shrink:0}
+.addbtn{display:flex;align-items:center;justify-content:center;gap:5px;background:var(--g0);border:1.5px dashed var(--g3);border-radius:var(--radius);padding:9px;color:var(--g7);font-size:12px;font-weight:600;cursor:pointer}
+.addbtn:hover{background:var(--g1)}
+
+/* ══ RESULT / PE / NUTRI ══ */
+.rpanel{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--radius-lg);overflow:hidden}
+.rpanel.hidden{display:none}
+.rphdr{padding:9px 14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--n1);color:var(--n6);border-bottom:1px solid var(--n2)}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--n2);font-size:13px}
+.rrow:last-child{border-bottom:none}
+.rl{color:var(--n6)}
+.rv{font-weight:700;color:var(--n9)}
+.rv.grn{color:var(--g5);font-size:16px}
+.rv.red{color:var(--r6);font-size:16px}
+.pe-card{background:var(--g9);border-radius:var(--radius-lg);overflow:hidden}
+.pe-hdr{padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,.1)}
+.pe-title{font-size:11px;font-weight:700;color:var(--w);letter-spacing:.06em;text-transform:uppercase}
+.pe-tag{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px}
+.pe-row{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+.pe-row:last-child{border-bottom:none}
+.pl{color:rgba(255,255,255,.5)}
+.pv{font-weight:700;color:var(--w)}
+.pv.big{font-size:16px;color:var(--g3)}
+.sbadge{border-radius:var(--radius);padding:11px 13px;display:flex;align-items:center;gap:9px}
+.sbadge.hidden{display:none}
+.sbadge.success{background:var(--g1);border:2px solid var(--g5)}
+.sbadge.danger{background:var(--r1);border:2px solid var(--r6)}
+.sbadge.warning{background:var(--a1);border:2px solid var(--a6)}
+.bdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.success .bdot{background:var(--g5)}
+.danger .bdot{background:var(--r6)}
+.warning .bdot{background:var(--a6)}
+.btxt{font-size:13px;font-weight:700}
+.success .btxt{color:var(--g7)}
+.danger .btxt{color:var(--r6)}
+.warning .btxt{color:var(--a6)}
+.bsub{font-size:11px;color:var(--n6);margin-top:2px}
+.nblock{background:var(--g9);border-radius:var(--radius-lg);overflow:hidden}
+.nblock.hidden{display:none}
+.nhdr{padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,.1)}
+.ntitle{font-size:11px;font-weight:700;color:var(--w);letter-spacing:.06em;text-transform:uppercase}
+.ntag{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px}
+.nrow{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+.nrow:last-child{border-bottom:none}
+.nl{color:rgba(255,255,255,.5)}
+.nv{font-weight:700;color:var(--w)}
+.nv.big{font-size:16px;color:var(--g3)}
+
+/* ══ HIST / EVENTS ══ */
+.hist-card{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--radius);padding:10px 12px;transition:border-color .15s;cursor:default}
+.hist-card:hover{border-color:var(--g3)}
+.hist-head{display:flex;justify-content:space-between;margin-bottom:3px}
+.hist-type{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--n4)}
+.hist-date{font-size:10px;color:var(--n4)}
+.hist-val{font-size:13px;font-weight:700}
+.hist-sub{font-size:11px;color:var(--n6);margin-top:1px}
+.hist-empty{font-size:12px;color:var(--n4);text-align:center;padding:18px 0}
+.ev-item{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;background:var(--n1);border-radius:var(--radius);border-left:3px solid var(--g5)}
+.ev-item.sanitario{border-left-color:var(--r6)}
+.ev-item.pesagem{border-left-color:var(--b6)}
+.ev-item.financeiro{border-left-color:var(--a6)}
+.ev-title{font-size:13px;font-weight:600}
+.ev-sub{font-size:11px;color:var(--n4);margin-top:1px}
+
+/* ══ CALENDAR ══ */
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-month{font-family:'DM Serif Display',serif;font-size:17px;color:var(--n9)}
+.cal-nav{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--n1);border:1px solid var(--n2);border-radius:var(--radius-sm);cursor:pointer;font-size:15px;color:var(--n6)}
+.cal-nav:hover{background:var(--n2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:9px;font-weight:700;color:var(--n4);text-align:center;padding:5px 0;text-transform:uppercase}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);font-size:11px;font-weight:500;cursor:pointer;position:relative;transition:background .1s}
+.cal-day:hover{background:var(--n1)}
+.cal-day.other{color:var(--n4);font-weight:300}
+.cal-day.today{background:var(--g1);color:var(--g7);font-weight:700}
+.cal-day.selected{background:var(--g7);color:var(--w);font-weight:700}
+.cal-day.has-ev::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--a6)}
+.cal-day.selected.has-ev::after{background:var(--g3)}
+.add-ev-panel{background:var(--g0);border:1px solid var(--g1);border-radius:var(--radius-lg);padding:14px;display:none;flex-direction:column;gap:10px}
+.add-ev-panel.visible{display:flex}
+
+/* ══ CALCULATOR ══ */
+.calc-wrap{background:var(--n9);border-radius:var(--radius-lg);overflow:hidden}
+.calc-display{padding:13px 15px 8px;text-align:right}
+.calc-expr{font-size:11px;color:var(--n4);min-height:14px;margin-bottom:3px;word-break:break-all}
+.calc-result{font-size:28px;font-weight:600;color:var(--w);min-height:36px;word-break:break-all}
+.calc-tabs{display:flex;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+.calc-tab{flex:1;padding:8px 4px;text-align:center;font-size:10px;font-weight:700;color:rgba(255,255,255,.3);cursor:pointer;transition:all .15s;letter-spacing:.04em;text-transform:uppercase}
+.calc-tab.active{color:var(--g3);background:rgba(255,255,255,.07)}
+.calc-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06)}
+.cbtn{background:rgba(255,255,255,.07);padding:15px 0;text-align:center;font-size:17px;font-weight:500;color:var(--w);cursor:pointer;transition:background .1s;user-select:none;touch-action:manipulation}
+.cbtn:hover,.cbtn:active{background:rgba(255,255,255,.18)}
+.cbtn.op{background:rgba(46,139,71,.22);color:var(--g3)}
+.cbtn.op:hover{background:rgba(46,139,71,.38)}
+.cbtn.eq{background:var(--g7);color:var(--w);font-size:19px}
+.cbtn.eq:hover{background:var(--g5)}
+.cbtn.clr{background:rgba(220,38,38,.2);color:#fca5a5;font-size:13px}
+.dose-panel{padding:13px;display:flex;flex-direction:column;gap:10px}
+.dose-panel .flbl{color:rgba(255,255,255,.5)}
+.dose-panel .iwrap{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}
+.dose-panel .iwrap input,.dose-panel .iwrap select{color:var(--w);min-height:42px}
+.dose-panel .iwrap input::placeholder{color:rgba(255,255,255,.2)}
+.dose-panel .ipfx,.dose-panel .isfx{color:rgba(255,255,255,.3)}
+.dose-box{background:rgba(46,139,71,.15);border:1px solid rgba(109,191,130,.2);border-radius:var(--radius);padding:11px;text-align:center}
+.dose-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:3px}
+.dose-val{font-size:23px;font-weight:700;color:var(--g3)}
+.dose-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+
+/* ══ NOTAS ══ */
+.nota-card{background:var(--w);border:1.5px solid var(--n2);border-radius:var(--radius-lg);overflow:hidden}
+.nota-card:hover{border-color:var(--g3)}
+.nota-head{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px 6px}
+.nota-title{font-size:13px;font-weight:600;flex:1;margin-right:8px}
+.nota-lote{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--g1);color:var(--g7);white-space:nowrap}
+.nota-body{padding:0 12px 9px;font-size:12px;color:var(--n6);line-height:1.5}
+.nota-foot{padding:7px 12px;border-top:1px solid var(--n1);display:flex;align-items:center;gap:7px}
+.nota-date{font-size:10px;color:var(--n4);flex:1}
+.nota-badge{font-size:10px;color:var(--n4)}
+.media-btns{display:flex;gap:8px}
+.media-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:var(--n1);border:1.5px solid var(--n2);border-radius:var(--radius);padding:9px;font-size:12px;font-weight:600;color:var(--n6);cursor:pointer}
+.media-btn.on{background:var(--g1);border-color:var(--g3);color:var(--g7)}
+.m-prev{display:flex;flex-wrap:wrap;gap:6px}
+.m-thumb{width:52px;height:52px;border-radius:var(--radius-sm);overflow:hidden;position:relative;border:1px solid var(--n2)}
+.m-thumb img{width:100%;height:100%;object-fit:cover}
+.m-thumb .rm{position:absolute;top:-4px;right:-4px;width:14px;height:14px;background:var(--r6);color:var(--w);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer}
+.audio-ind{background:var(--g0);border:1px solid var(--g3);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g7);font-weight:600}
+.audio-ind.hidden{display:none}
+.awave{display:flex;gap:2px;align-items:center}
+.awave span{width:3px;background:var(--g5);border-radius:2px;animation:wav .8s ease-in-out infinite}
+.awave span:nth-child(1){height:7px}
+.awave span:nth-child(2){height:13px;animation-delay:.1s}
+.awave span:nth-child(3){height:9px;animation-delay:.2s}
+.awave span:nth-child(4){height:15px;animation-delay:.15s}
+.awave span:nth-child(5){height:5px;animation-delay:.3s}
+@keyframes wav{0%,100%{opacity:.4;transform:scaleY(.7)}50%{opacity:1;transform:scaleY(1)}}
+
+/* ══ MODAL ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:500;animation:mf .2s ease}
+.overlay.hidden{display:none}
+@keyframes mf{from{opacity:0}to{opacity:1}}
+.modal{background:var(--w);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:22px 18px calc(env(safe-area-inset-bottom)+22px);width:100%;max-width:460px;margin:0 auto;animation:ms .25s cubic-bezier(.4,0,.2,1)}
+@keyframes ms{from{transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--n9);margin-bottom:3px}
+.modal-sub{font-size:11px;color:var(--n4);margin-bottom:16px}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 12px);left:50%;transform:translateX(-50%);background:var(--g9);color:var(--w);padding:10px 18px;border-radius:30px;font-size:13px;font-weight:600;z-index:999;box-shadow:var(--shadow-lg);white-space:nowrap;pointer-events:none;animation:fi .3s ease}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:639px){.page{padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 14px)}}
+@media(min-width:640px){
+  .page{padding:20px 24px}
+  .frow{grid-template-columns:1fr 1fr}
+  .overlay{align-items:center;padding:20px}
+  .modal{border-radius:var(--radius-lg);max-height:90vh;overflow-y:auto}
+  .bottom-nav{max-width:640px;left:50%;right:auto;transform:translateX(-50%)}
+  .fab{right:max(16px,calc(50% - 320px + 16px))}
+}
+@media(min-width:1024px){
+  .sidebar{display:flex}
+  .main{margin-left:var(--sidebar-w)}
+  .bottom-nav,.fab{display:none}
+  .topbar{display:flex}
+  .mobile-hero{display:none}
+  .page{padding:24px 28px}
+  .g4-desktop{grid-template-columns:repeat(4,1fr)}
+}
+@media(min-width:1280px){:root{--sidebar-w:260px}.page{padding:26px 32px}}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════ -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-logo">Agro<em>Gestão</em></div>
+  <p class="auth-tagline">Gestão inteligente para pecuária de corte</p>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="atab-login" onclick="switchAuthTab('login')">Entrar</div>
+      <div class="auth-tab" id="atab-register" onclick="switchAuthTab('register')">Cadastrar</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="auth-login">
+      <div class="auth-title">Bem-vindo de volta</div>
+      <div class="auth-sub">Entre com a sua conta para sincronizar dados entre dispositivos.</div>
+      <div class="auth-form">
+        <div class="fgrp">
+          <label class="flbl">E-mail</label>
+          <div class="iwrap"><input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email"></div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Senha</label>
+          <div class="iwrap"><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+            <span class="isfx" style="cursor:pointer;user-select:none" onclick="togglePwd('login-pass',this)">👁</span>
+          </div>
+        </div>
+        <div id="login-error" style="font-size:12px;color:var(--r6);display:none"></div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar na conta</button>
+      </div>
+      <div class="auth-divider"><span>ou continue sem conta</span></div>
+      <button class="guest-btn" onclick="guestMode()">🌾 Usar como visitante</button>
+      <p class="guest-note">Sem cadastro, sem dados na nuvem.<br>Seus cálculos ficam apenas neste dispositivo.</p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="auth-register" style="display:none">
+      <div class="auth-title">Criar conta gratuita</div>
+      <div class="auth-sub">Sincronize dados entre celular e computador. Seus registros ficam seguros.</div>
+      <div class="auth-form">
+        <div class="fgrp">
+          <label class="flbl">Nome completo</label>
+          <div class="iwrap"><input type="text" id="reg-name" placeholder="João da Silva" autocomplete="name"></div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Nome da Fazenda</label>
+          <div class="iwrap"><input type="text" id="reg-farm" placeholder="Fazenda Santa Rita" maxlength="40"></div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">E-mail</label>
+          <div class="iwrap"><input type="email" id="reg-email" placeholder="seu@email.com" autocomplete="email"></div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Senha</label>
+          <div class="iwrap"><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+            <span class="isfx" style="cursor:pointer;user-select:none" onclick="togglePwd('reg-pass',this)">👁</span>
+          </div>
+        </div>
+        <div id="reg-error" style="font-size:12px;color:var(--r6);display:none"></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()">Criar conta</button>
+      </div>
+      <div class="auth-divider"><span>ou continue sem conta</span></div>
+      <button class="guest-btn" onclick="guestMode()">🌾 Usar como visitante</button>
+      <p class="guest-note">Sem cadastro, sem dados na nuvem.<br>Crie uma conta depois para não perder seus dados.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     APP SHELL
+════════════════════════════════ -->
+<div class="shell" id="app-shell" style="display:none">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <!-- user chip inside sidebar -->
+    <div class="user-chip" id="sb-user-chip">
+      <div class="user-avatar" id="sb-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sb-user-name">Visitante</div>
+        <div class="user-plan" id="sb-user-plan">Modo local</div>
+      </div>
+      <div class="user-signout" onclick="signOut()">Sair</div>
+    </div>
+    <div class="sb-brand-name">Agro<em>Gestão</em></div>
+    <div class="sb-farm-lbl" id="sb-farm-lbl" onclick="openFarmModal()">🏡 Configurar Fazenda</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Principal</div>
+    <div class="sb-item active" id="sbi-home" onclick="navigate('home')"><span class="si">🏠</span>Início</div>
+    <div class="sb-item" id="sbi-financeiro" onclick="navigate('financeiro')"><span class="si">💰</span>Gestão Financeira</div>
+    <div class="sb-item" id="sbi-pesagem" onclick="navigate('pesagem')"><span class="si">⚖️</span>Pesagem &amp; GMD</div>
+    <div class="sb-sec">Ferramentas</div>
+    <div class="sb-item" id="sbi-calendario" onclick="navigate('calendario')"><span class="si">📅</span>Calendário</div>
+    <div class="sb-item" id="sbi-calculadora" onclick="navigate('calculadora')"><span class="si">🧮</span>Calculadora</div>
+    <div class="sb-item" id="sbi-anotacoes" onclick="navigate('anotacoes')"><span class="si">📝</span>Anotações</div>
+    <div class="sb-item" id="sbi-sanitario" onclick="navigate('sanitario')"><span class="si">💉</span>Sanitário</div>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-sync"><div class="sync-dot" id="sb-sync-dot"></div><span id="sb-sync-lbl">Dados locais</span></div>
+    <button class="btn btn-ghost btn-sm btn-full" id="sb-upgrade-btn" onclick="showUpgradePrompt()" style="display:none">☁️ Activar sincronização</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tb-title" id="tb-title">Início — Painel</div>
+    <div class="tb-right">
+      <div class="tb-sync"><div class="sync-dot" id="tb-sync-dot"></div><span id="tb-sync-lbl">Local</span></div>
+      <div class="tb-user" id="tb-user-btn" onclick="openUserMenu()">
+        <div class="tb-avatar" id="tb-avatar">?</div>
+        <span id="tb-user-name">Visitante</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE HERO -->
+  <div class="mobile-hero" id="mob-hero">
+    <div class="hero-row">
+      <div class="hero-left">
+        <div class="hero-eyebrow">🌾 AgroGestão v6.0</div>
+        <h1 class="hero-title">Gestão<br><em>de Campo</em></h1>
+        <p class="hero-sub" id="mob-hero-sub">Pecuária de corte · Safra 2025</p>
+      </div>
+      <div class="hero-user-btn" onclick="openUserMenu()">
+        <div class="hu-avatar" id="mob-avatar">?</div>
+        <div class="hu-name" id="mob-user-name">Visitante</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGES ── -->
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="pi">
+      <div id="upgrade-banner-home" class="upgrade-banner hidden" onclick="showUpgradePrompt()">
+        <div class="ub-ico">☁️</div>
+        <div class="ub-text">
+          <div class="ub-title">Activar sincronização entre dispositivos</div>
+          <div class="ub-sub">Crie uma conta gratuita — leva menos de 1 minuto</div>
+        </div>
+        <div class="ub-arr">›</div>
+      </div>
+      <div id="alerts-wrap" style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px"></div>
+      <!-- Desktop welcome -->
+      <div id="desk-welcome" style="display:none;margin-bottom:18px">
+        <h2 style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--n9)">Bom dia, <em id="dw-name" style="font-style:italic;color:var(--g7)">Produtor</em> 👋</h2>
+        <p style="font-size:12px;color:var(--n4);margin-top:3px" id="dw-sub">Acompanhe o desempenho da fazenda.</p>
+      </div>
+      <!-- KPIs desktop -->
+      <div id="kpi-grid" style="display:none;margin-bottom:16px"></div>
+      <span class="slbl">Módulos Principais</span>
+      <div class="g2" style="margin-bottom:12px">
+        <div class="mod-card primary" onclick="navigate('financeiro')"><div class="mod-ico">💰</div><div class="mod-info"><div class="mod-title">Gestão Financeira</div><div class="mod-desc">Custo/@ · equilíbrio · fluxo</div></div><div class="mod-arr">›</div></div>
+        <div class="mod-card" onclick="navigate('pesagem')"><div class="mod-ico">⚖️</div><div class="mod-info"><div class="mod-title">Pesagem &amp; GMD</div><div class="mod-desc">Défice · nutrição · ganho diário</div></div><div class="mod-arr">›</div></div>
+      </div>
+      <span class="slbl">Ferramentas</span>
+      <div id="tools-grid" class="g2" style="margin-bottom:14px">
+        <div class="mod-card" onclick="navigate('calendario')" style="flex-direction:column;align-items:flex-start;gap:7px;min-height:auto;padding:13px"><div class="mod-ico" style="background:var(--g1)">📅</div><div class="mod-info"><div class="mod-title" style="font-size:13px">Calendário</div><div class="mod-desc">Alertas sanitários</div></div></div>
+        <div class="mod-card" onclick="navigate('calculadora')" style="flex-direction:column;align-items:flex-start;gap:7px;min-height:auto;padding:13px"><div class="mod-ico" style="background:var(--a1)">🧮</div><div class="mod-info"><div class="mod-title" style="font-size:13px">Calculadora</div><div class="mod-desc">Dosagem &amp; ração</div></div></div>
+        <div class="mod-card" onclick="navigate('anotacoes')" style="flex-direction:column;align-items:flex-start;gap:7px;min-height:auto;padding:13px"><div class="mod-ico" style="background:var(--b1)">📝</div><div class="mod-info"><div class="mod-title" style="font-size:13px">Anotações</div><div class="mod-desc">Foto · áudio · lote</div></div></div>
+        <div class="mod-card" onclick="navigate('sanitario')" style="flex-direction:column;align-items:flex-start;gap:7px;min-height:auto;padding:13px"><div class="mod-ico" style="background:var(--r1)">💉</div><div class="mod-info"><div class="mod-title" style="font-size:13px">Sanitário</div><div class="mod-desc">Vacinas &amp; alertas</div></div></div>
+      </div>
+      <div id="home-bottom" style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <span class="slbl">Histórico Recente</span>
+          <div id="hist-list" style="display:flex;flex-direction:column;gap:7px"><div class="hist-empty">Nenhum cálculo ainda.</div></div>
+        </div>
+        <div id="home-ev-col" style="display:none">
+          <span class="slbl">Próximos Alertas</span>
+          <div id="home-ev-list" style="display:flex;flex-direction:column;gap:7px"><div class="hist-empty">Sem eventos.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div class="page" id="page-financeiro">
+    <div class="pi">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:3px">Gestão Financeira</h2>
+      <p style="font-size:12px;color:var(--n4);margin-bottom:14px">Custos por categoria · custo/@ · ponto de equilíbrio ao vivo</p>
+      <div id="fin-layout" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div class="fgrp"><label class="flbl">📈 Receita Total</label>
+            <div class="iwrap" id="wrap-ganhos"><span class="ipfx">R$</span><input type="number" id="fin-ganhos" placeholder="0" min="0" step="1" inputmode="decimal" oninput="atualizarPE()"></div>
+            <span class="ferr" id="err-ganhos">Informe um valor válido.</span>
+          </div>
+          <div class="fgrp"><label class="flbl">📉 Custos</label>
+            <div id="cost-lines" style="display:flex;flex-direction:column;gap:6px"></div>
+            <div class="addbtn" onclick="addCostLine()">＋ Adicionar custo</div>
+          </div>
+          <div class="frow" style="grid-template-columns:1fr 1fr">
+            <div class="fgrp"><label class="flbl">🎯 Preço por @</label><div class="iwrap"><span class="ipfx">R$</span><input type="number" id="fin-parr" placeholder="185" min="0" step="1" inputmode="decimal" oninput="atualizarPE()"><span class="isfx">/@</span></div></div>
+            <div class="fgrp"><label class="flbl">⚖️ Total em @</label><div class="iwrap"><input type="number" id="fin-arrobas" placeholder="17" min="0" step="1" inputmode="decimal" oninput="atualizarPE()"><span class="isfx">@</span></div></div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="calcularFinanceiro()">Calcular Resultado</button>
+          <div class="rpanel hidden" id="fin-resultado">
+            <div class="rphdr">Resumo Financeiro</div>
+            <div class="rrow"><span class="rl">Receita Total</span><span class="rv" id="fin-r-ganhos">—</span></div>
+            <div class="rrow"><span class="rl">Custos Totais</span><span class="rv" id="fin-r-custos">—</span></div>
+            <div class="rrow"><span class="rl">Custo por @</span><span class="rv" id="fin-r-custarr">—</span></div>
+            <div class="rrow"><span class="rl" style="font-weight:700">Lucro / Prejuízo</span><span class="rv" id="fin-r-lucro">—</span></div>
+          </div>
+          <div class="sbadge hidden" id="fin-status"><div class="bdot"></div><div><div class="btxt" id="fin-st-txt"></div><div class="bsub" id="fin-st-sub"></div></div></div>
+        </div>
+        <div>
+          <div class="pe-card">
+            <div class="pe-hdr"><span>⚡</span><span class="pe-title">Ponto de Equilíbrio</span><span class="pe-tag">Ao vivo</span></div>
+            <div class="pe-row"><span class="pl">Custo total acumulado</span><span class="pv" id="pe-custo-total">—</span></div>
+            <div class="pe-row"><span class="pl">Preço mínimo para cobrir custos</span><span class="pv big" id="pe-preco-min">—</span></div>
+            <div class="pe-row"><span class="pl">Margem atual</span><span class="pv" id="pe-margem">—</span></div>
+            <div class="pe-row"><span class="pl" style="font-size:9px;font-style:italic;color:rgba(255,255,255,.28)">Actualiza ao digitar</span><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PESAGEM -->
+  <div class="page" id="page-pesagem">
+    <div class="pi">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:3px">Pesagem &amp; GMD</h2>
+      <p style="font-size:12px;color:var(--n4);margin-bottom:14px">Peso · défice · ganho médio diário · plano alimentar</p>
+      <div id="pes-layout" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="fgrp"><label class="flbl">🐂 Lote</label><div class="iwrap"><input type="text" id="pes-lote" placeholder="Lote A — Nelore" maxlength="30"></div></div>
+          <div class="frow" style="grid-template-columns:1fr 1fr">
+            <div class="fgrp"><label class="flbl">🎯 Peso Ideal</label><div class="iwrap" id="wrap-ideal"><input type="number" id="pes-ideal" placeholder="450" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()"><span class="isfx">kg</span></div><span class="ferr" id="err-ideal">Informe o peso.</span></div>
+            <div class="fgrp"><label class="flbl">⚖️ Peso Atual</label><div class="iwrap" id="wrap-atual"><input type="number" id="pes-atual" placeholder="380" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()"><span class="isfx">kg</span></div><span class="ferr" id="err-atual">Informe o peso.</span></div>
+          </div>
+          <div class="frow" style="grid-template-columns:1fr 1fr">
+            <div class="fgrp"><label class="flbl">📅 Dias confinado</label><div class="iwrap"><input type="number" id="pes-dias" placeholder="90" min="1" step="1" inputmode="decimal" oninput="atualizarPEPes()"><span class="isfx">d</span></div></div>
+            <div class="fgrp"><label class="flbl">🌽 R$/kg Ração</label><div class="iwrap" id="wrap-preco"><span class="ipfx">R$</span><input type="number" id="pes-preco" placeholder="4" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()"></div><span class="ferr" id="err-preco">Informe o preço.</span></div>
+          </div>
+          <div class="fgrp"><label class="flbl">💲 Preço esperado de venda por @</label><div class="iwrap"><span class="ipfx">R$</span><input type="number" id="pes-pvenda" placeholder="185" min="0" step="1" inputmode="decimal" oninput="atualizarPEPes()"><span class="isfx">/@</span></div></div>
+          <button class="btn btn-primary btn-full" onclick="calcularPesagem()">Verificar Peso &amp; GMD</button>
+          <div class="sbadge hidden" id="pes-status"><div class="bdot"></div><div><div class="btxt" id="pes-st-txt"></div><div class="bsub" id="pes-st-sub"></div></div></div>
+          <div class="nblock hidden" id="nutri-panel">
+            <div class="nhdr"><span>🌽</span><span class="ntitle">Plano de Nutrição</span><span class="ntag">Automático</span></div>
+            <div class="nrow"><span class="nl">Défice de peso</span><span class="nv" id="n-defice">—</span></div>
+            <div class="nrow"><span class="nl">GMD registado</span><span class="nv" id="n-gmd">—</span></div>
+            <div class="nrow"><span class="nl">Conversão Alimentar</span><span class="nv">7,0</span></div>
+            <div class="nrow"><span class="nl">KG de ração necessário</span><span class="nv" id="n-racao">—</span></div>
+            <div class="nrow"><span class="nl">Custo total estimado</span><span class="nv big" id="n-custo">—</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="pe-card">
+            <div class="pe-hdr"><span>⚡</span><span class="pe-title">Equilíbrio de Engorda</span><span class="pe-tag">Ao vivo</span></div>
+            <div class="pe-row"><span class="pl">GMD estimado</span><span class="pv" id="ppe-gmd">—</span></div>
+            <div class="pe-row"><span class="pl">Custo de engorda</span><span class="pv" id="ppe-custo">—</span></div>
+            <div class="pe-row"><span class="pl">Arrobas ganhas</span><span class="pv" id="ppe-arrobas">—</span></div>
+            <div class="pe-row"><span class="pl">Preço mín. por @ para equilibrar</span><span class="pv big" id="ppe-pmin">—</span></div>
+            <div class="pe-row"><span class="pl">Resultado esperado</span><span class="pv" id="ppe-resultado">—</span></div>
+            <div class="pe-row"><span class="pl" style="font-size:9px;font-style:italic;color:rgba(255,255,255,.28)">Actualiza ao digitar</span><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDÁRIO -->
+  <div class="page" id="page-calendario">
+    <div class="pi">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:3px">Calendário</h2>
+      <p style="font-size:12px;color:var(--n4);margin-bottom:14px">Sanitário · pesagens · alertas automáticos</p>
+      <div id="cal-layout" style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div class="card"><div class="card-body">
+            <div class="cal-hdr"><div class="cal-nav" onclick="calNav(-1)">‹</div><div class="cal-month" id="cal-month"></div><div class="cal-nav" onclick="calNav(1)">›</div></div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div></div>
+          <div class="add-ev-panel" id="add-ev-panel" style="margin-top:10px">
+            <div class="frow" style="grid-template-columns:1fr 1fr">
+              <div class="fgrp"><label class="flbl">📌 Tipo</label><div class="iwrap"><select id="ev-tipo"><option value="sanitario">💉 Sanitário</option><option value="pesagem">⚖️ Pesagem</option><option value="financeiro">💰 Financeiro</option><option value="geral">📋 Geral</option></select></div></div>
+              <div class="fgrp"><label class="flbl">📅 Data</label><div class="iwrap"><input type="date" id="ev-data" style="min-height:44px;font-size:14px"></div></div>
+            </div>
+            <div class="fgrp"><label class="flbl">✏️ Descrição</label><div class="iwrap"><input type="text" id="ev-desc" placeholder="Ex: Vacinação Aftosa — Lote A" maxlength="60"></div></div>
+            <div class="fgrp"><label class="flbl">🐂 Lote</label><div class="iwrap"><input type="text" id="ev-lote" placeholder="Lote A" maxlength="30"></div></div>
+            <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="saveEvent()">Salvar</button><button class="btn btn-ghost btn-sm" onclick="$('add-ev-panel').classList.remove('visible')">✕</button></div>
+          </div>
+          <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="$('add-ev-panel').classList.toggle('visible')">＋ Novo Evento</button>
+        </div>
+        <div>
+          <span class="slbl" id="ev-list-lbl">Próximos Eventos</span>
+          <div id="ev-list" style="display:flex;flex-direction:column;gap:8px"><div class="hist-empty">Sem eventos.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALCULADORA -->
+  <div class="page" id="page-calculadora">
+    <div class="pi">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:3px">Calculadora</h2>
+      <p style="font-size:12px;color:var(--n4);margin-bottom:14px">Geral · dosagem · suplementação</p>
+      <div style="max-width:460px">
+        <div class="calc-wrap">
+          <div class="calc-display"><div class="calc-expr" id="calc-expr"></div><div class="calc-result" id="calc-result">0</div></div>
+          <div class="calc-tabs">
+            <div class="calc-tab active" id="ctab-normal" onclick="switchCalcTab('normal')">Geral</div>
+            <div class="calc-tab" id="ctab-dose" onclick="switchCalcTab('dose')">Dosagem</div>
+            <div class="calc-tab" id="ctab-supl" onclick="switchCalcTab('supl')">Suplemento</div>
+          </div>
+          <div id="cpanel-normal">
+            <div class="calc-btns">
+              <div class="cbtn clr" onclick="calcClear()">AC</div><div class="cbtn op" onclick="ci('(')">(</div><div class="cbtn op" onclick="ci(')')">)</div><div class="cbtn op" onclick="ci('/')">÷</div>
+              <div class="cbtn" onclick="ci('7')">7</div><div class="cbtn" onclick="ci('8')">8</div><div class="cbtn" onclick="ci('9')">9</div><div class="cbtn op" onclick="ci('*')">×</div>
+              <div class="cbtn" onclick="ci('4')">4</div><div class="cbtn" onclick="ci('5')">5</div><div class="cbtn" onclick="ci('6')">6</div><div class="cbtn op" onclick="ci('-')">−</div>
+              <div class="cbtn" onclick="ci('1')">1</div><div class="cbtn" onclick="ci('2')">2</div><div class="cbtn" onclick="ci('3')">3</div><div class="cbtn op" onclick="ci('+')">+</div>
+              <div class="cbtn" onclick="ci('.')">.</div><div class="cbtn" onclick="ci('0')">0</div><div class="cbtn clr" onclick="calcBack()">⌫</div><div class="cbtn eq" onclick="calcEq()">=</div>
+            </div>
+          </div>
+          <div id="cpanel-dose" style="display:none">
+            <div class="dose-panel">
+              <div class="fgrp"><label class="flbl">💊 Medicamento</label><div class="iwrap"><input type="text" placeholder="Ex: Ivermectina 1%" style="min-height:40px"></div></div>
+              <div class="frow" style="grid-template-columns:1fr 1fr">
+                <div class="fgrp"><label class="flbl">⚖️ Peso (kg)</label><div class="iwrap"><input type="number" id="dose-peso" placeholder="380" step="1" inputmode="decimal" oninput="calcDose()"><span class="isfx">kg</span></div></div>
+                <div class="fgrp"><label class="flbl">💉 Dose/10kg</label><div class="iwrap"><input type="number" id="dose-por10" placeholder="1" step="1" inputmode="decimal" oninput="calcDose()"><span class="isfx">ml</span></div></div>
+              </div>
+              <div class="dose-box"><div class="dose-lbl">Dose total calculada</div><div class="dose-val" id="dose-val">—</div><div class="dose-sub" id="dose-sub">Preencha peso e dose</div></div>
+            </div>
+          </div>
+          <div id="cpanel-supl" style="display:none">
+            <div class="dose-panel">
+              <div class="frow" style="grid-template-columns:1fr 1fr">
+                <div class="fgrp"><label class="flbl">🐂 Animais</label><div class="iwrap"><input type="number" id="supl-animais" placeholder="50" step="1" inputmode="decimal" oninput="calcSupl()"></div></div>
+                <div class="fgrp"><label class="flbl">📦 g/animal/dia</label><div class="iwrap"><input type="number" id="supl-cons" placeholder="100" step="1" inputmode="decimal" oninput="calcSupl()"><span class="isfx">g</span></div></div>
+              </div>
+              <div class="frow" style="grid-template-columns:1fr 1fr">
+                <div class="fgrp"><label class="flbl">📅 Dias</label><div class="iwrap"><input type="number" id="supl-dias" placeholder="30" step="1" inputmode="decimal" oninput="calcSupl()"></div></div>
+                <div class="fgrp"><label class="flbl">💰 R$/kg</label><div class="iwrap"><input type="number" id="supl-preco" placeholder="5" step="1" inputmode="decimal" oninput="calcSupl()"></div></div>
+              </div>
+              <div class="dose-box"><div class="dose-lbl">Total necessário &amp; custo</div><div class="dose-val" id="supl-val">—</div><div class="dose-sub" id="supl-sub">Preencha os campos</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANOTAÇÕES -->
+  <div class="page" id="page-anotacoes">
+    <div class="pi">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:3px">Anotações</h2>
+      <p style="font-size:12px;color:var(--n4);margin-bottom:14px">Foto · áudio · vinculadas ao lote</p>
+      <div id="nota-layout" style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Nova Anotação</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+              <div class="fgrp"><label class="flbl">🐂 Lote / Animal</label><div class="iwrap"><input type="text" id="nota-lote" placeholder="Ex: Lote A — Boi 17" maxlength="30"></div></div>
+              <div class="fgrp"><label class="flbl">✏️ Anotação</label><div class="iwrap"><textarea id="nota-texto" placeholder="Observação, sintoma, conduta…" rows="3"></textarea></div></div>
+              <div class="media-btns"><div class="media-btn" id="btn-foto" onclick="toggleFoto()">📷 Foto</div><div class="media-btn" id="btn-audio" onclick="toggleAudio()">🎙️ Áudio</div></div>
+              <div class="m-prev" id="m-prev"></div>
+              <div class="audio-ind hidden" id="audio-ind"><div class="awave"><span></span><span></span><span></span><span></span><span></span></div><span>Gravando…</span><span style="margin-left:auto;font-size:11px;color:var(--g7)" id="audio-timer">0:00</span></div>
+              <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoChange(event)">
+              <button class="btn btn-primary btn-full" onclick="salvarNota()">Salvar Anotação</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="slbl">Anotações Salvas</span>
+          <div id="notas-list" style="display:flex;flex-direction:column;gap:10px"><div class="hist-empty">Nenhuma anotação ainda.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SANITÁRIO -->
+  <div class="page" id="page-sanitario">
+    <div class="pi">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:3px">Plano Sanitário</h2>
+      <p style="font-size:12px;color:var(--n4);margin-bottom:14px">Vacinas · vermífugos · alertas automáticos</p>
+      <div id="san-layout" style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Registar Procedimento</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+              <div class="fgrp"><label class="flbl">💉 Tipo</label><div class="iwrap"><select id="san-tipo"><option>Vacina Aftosa</option><option>Vacina Brucelose</option><option>Vacina Raiva</option><option>Vermífugo</option><option>Carrapaticida</option><option>Outro</option></select></div></div>
+              <div class="frow" style="grid-template-columns:1fr 1fr">
+                <div class="fgrp"><label class="flbl">🐂 Lote</label><div class="iwrap"><input type="text" id="san-lote" placeholder="Lote A" maxlength="40"></div></div>
+                <div class="fgrp"><label class="flbl">📅 Data</label><div class="iwrap"><input type="date" id="san-data" style="min-height:44px;font-size:14px"></div></div>
+              </div>
+              <div class="frow" style="grid-template-columns:1fr 1fr">
+                <div class="fgrp"><label class="flbl">🔁 Repetir em</label><div class="iwrap"><input type="number" id="san-intervalo" placeholder="180" min="1" step="1" inputmode="decimal"><span class="isfx">dias</span></div></div>
+                <div class="fgrp"><label class="flbl">📝 Observação</label><div class="iwrap"><input type="text" id="san-obs" placeholder="Dose, produto…" maxlength="60"></div></div>
+              </div>
+              <button class="btn btn-primary btn-full" onclick="salvarSanitario()">Registar &amp; Agendar Alerta</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="slbl">Histórico Sanitário</span>
+          <div id="san-list" style="display:flex;flex-direction:column;gap:8px"><div class="hist-empty">Nenhum registro ainda.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="bn-item active" id="bni-home" onclick="navigate('home')"><div class="bn-ico">🏠</div><div class="bn-lbl">Início</div></div>
+    <div class="bn-item" id="bni-financeiro" onclick="navigate('financeiro')"><div class="bn-ico">💰</div><div class="bn-lbl">Finanças</div></div>
+    <div class="bn-item" id="bni-pesagem" onclick="navigate('pesagem')"><div class="bn-ico">⚖️</div><div class="bn-lbl">Pesagem</div></div>
+    <div class="bn-item" id="bni-calendario" onclick="navigate('calendario')"><div class="bn-ico">📅<div class="bn-badge hidden" id="bn-badge">!</div></div><div class="bn-lbl">Agenda</div></div>
+    <div class="bn-item" id="bni-anotacoes" onclick="navigate('anotacoes')"><div class="bn-ico">📝</div><div class="bn-lbl">Notas</div></div>
+  </nav>
+  <div class="fab hidden" id="fab" onclick="$('add-ev-panel').classList.toggle('visible')">＋</div>
+</div>
+</div><!-- /shell -->
+
+<!-- MODALS -->
+<div class="overlay hidden" id="farm-modal">
+  <div class="modal">
+    <div class="modal-title">Sua Fazenda</div>
+    <div class="modal-sub">Personalize com os dados da operação</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="fgrp"><label class="flbl">🏡 Nome da Fazenda</label><div class="iwrap"><input type="text" id="farm-name" placeholder="Fazenda Santa Rita" maxlength="40"></div></div>
+      <div class="fgrp"><label class="flbl">📅 Safra</label><div class="iwrap"><input type="text" id="farm-safra" placeholder="Safra 2025" maxlength="20"></div></div>
+    </div>
+    <div class="modal-btns"><button class="btn btn-ghost" onclick="closeModal('farm-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveFarm()">Salvar</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="user-menu-modal">
+  <div class="modal">
+    <div class="modal-title" id="um-title">Conta</div>
+    <div class="modal-sub" id="um-sub"></div>
+    <div id="um-body" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="modal-btns"><button class="btn btn-ghost btn-full" onclick="closeModal('user-menu-modal')">Fechar</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="upgrade-modal">
+  <div class="modal">
+    <div class="modal-title">☁️ Activar Sincronização</div>
+    <div class="modal-sub">Crie uma conta gratuita para sincronizar entre dispositivos e guardar os seus dados na nuvem.</div>
+    <div style="background:var(--g0);border:1px solid var(--g1);border-radius:var(--radius);padding:14px;margin-bottom:4px">
+      <div style="font-size:13px;font-weight:600;color:var(--g7);margin-bottom:8px">Benefícios da conta gratuita:</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--n6)">
+        <div>✅ Sincronização em tempo real entre todos os dispositivos</div>
+        <div>✅ Backup automático na nuvem — dados nunca se perdem</div>
+        <div>✅ Histórico completo de pesagens e movimentos</div>
+        <div>✅ Anotações com foto/áudio guardadas com segurança</div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('upgrade-modal')">Agora não</button>
+      <button class="btn btn-primary" onclick="closeModal('upgrade-modal');$('app-shell').style.display='none';$('auth-screen').classList.remove('hidden');switchAuthTab('register')">Criar conta grátis</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ CORE ══ */
+const $=id=>document.getElementById(id);
+const BRL=v=>(+v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const KG=v=>(+v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' kg';
+const S={
+  get(k){try{return localStorage.getItem(k)}catch{return null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch{}},
+  gj(k,d=[]){try{return JSON.parse(S.get(k)||'null')||d}catch{return d}},
+  sj(k,v){S.set(k,JSON.stringify(v))}
+};
+
+/* ══ AUTH STATE ══ */
+let currentUser=null; // {name, email, farm, safra, isGuest}
+
+function switchAuthTab(tab){
+  ['login','register'].forEach(t=>{
+    $('atab-'+t).classList.toggle('active',t===tab);
+    $('auth-'+t).style.display=t===tab?'block':'none';
+  });
+}
+function togglePwd(id,btn){const el=$(id);el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈';}
+
+function doLogin(){
+  const email=$('login-email').value.trim().toLowerCase();
+  const pass=$('login-pass').value;
+  const err=$('login-error');err.style.display='none';
+  if(!email||!pass){err.textContent='Preencha e-mail e senha.';err.style.display='block';return;}
+  // Simulate stored accounts
+  const accounts=S.gj('agro_accounts',[]);
+  const acc=accounts.find(a=>a.email===email);
+  if(!acc){err.textContent='Conta não encontrada. Crie uma conta primeiro.';err.style.display='block';return;}
+  // Simple hash compare (demo)
+  if(acc.passHash!==simpleHash(pass)){err.textContent='Senha incorrecta.';err.style.display='block';return;}
+  currentUser={name:acc.name,email:acc.email,farm:acc.farm,safra:acc.safra||'Safra 2025',isGuest:false};
+  S.set('agro_current_user',JSON.stringify(currentUser));
+  launchApp();
+}
+
+function doRegister(){
+  const name=$('reg-name').value.trim();
+  const farm=$('reg-farm').value.trim();
+  const email=$('reg-email').value.trim().toLowerCase();
+  const pass=$('reg-pass').value;
+  const err=$('reg-error');err.style.display='none';
+  if(!name||!email||!pass){err.textContent='Preencha todos os campos.';err.style.display='block';return;}
+  if(pass.length<6){err.textContent='Senha deve ter pelo menos 6 caracteres.';err.style.display='block';return;}
+  if(!/\S+@\S+\.\S+/.test(email)){err.textContent='E-mail inválido.';err.style.display='block';return;}
+  const accounts=S.gj('agro_accounts',[]);
+  if(accounts.find(a=>a.email===email)){err.textContent='E-mail já cadastrado. Faça login.';err.style.display='block';return;}
+  const newAcc={name,email,farm:farm||'Minha Fazenda',safra:'Safra 2025',passHash:simpleHash(pass)};
+  accounts.push(newAcc);S.sj('agro_accounts',accounts);
+  currentUser={name,email,farm:farm||'Minha Fazenda',safra:'Safra 2025',isGuest:false};
+  S.set('agro_current_user',JSON.stringify(currentUser));
+  showToast('✅ Conta criada! Bem-vindo, '+name.split(' ')[0]+'!');
+  launchApp();
+}
+
+function guestMode(){
+  currentUser={name:'Visitante',email:null,farm:S.get('farm_name')||'',safra:S.get('farm_safra')||'Safra 2025',isGuest:true};
+  S.set('agro_current_user',JSON.stringify(currentUser));
+  launchApp();
+}
+
+function simpleHash(str){let h=5381;for(let i=0;i<str.length;i++)h=((h<<5)+h)+str.charCodeAt(i);return String(h>>>0);}
+
+function launchApp(){
+  $('auth-screen').classList.add('hidden');
+  $('app-shell').style.display='flex';
+  applyUserUI();
+  applyResponsive();
+  addCostLine();
+  applyFarm();
+  renderAll();
+  const last=S.get('agro_screen_'+userKey());
+  navigate(['home','financeiro','pesagem','calendario','calculadora','anotacoes','sanitario'].includes(last)?last:'home');
+  const td=new Date();$('san-data').value=`${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
+  $('ev-data').value=$('san-data').value;
+}
+
+function userKey(){return currentUser?.email||'guest';}
+
+function applyUserUI(){
+  if(!currentUser)return;
+  const initials=currentUser.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  [$('sb-avatar'),$('tb-avatar'),$('mob-avatar')].forEach(el=>{if(el)el.textContent=initials;});
+  [$('sb-user-name'),$('tb-user-name'),$('mob-user-name')].forEach(el=>{if(el)el.textContent=currentUser.name.split(' ')[0];});
+  if($('sb-user-plan'))$('sb-user-plan').textContent=currentUser.isGuest?'Modo visitante (local)':'Conta activa · Sincronizado';
+  // sync indicator
+  const synced=!currentUser.isGuest;
+  [$('sb-sync-dot'),$('tb-sync-dot')].forEach(el=>{if(el){el.className='sync-dot'+(synced?'':' offline');}});
+  [$('sb-sync-lbl'),$('tb-sync-lbl')].forEach(el=>{if(el)el.textContent=synced?'Sincronizado':'Dados locais';});
+  // upgrade banner
+  const ub=$('upgrade-banner-home');if(ub)ub.classList.toggle('hidden',!currentUser.isGuest);
+  const sbub=$('sb-upgrade-btn');if(sbub)sbub.style.display=currentUser.isGuest?'flex':'none';
+}
+
+function openUserMenu(){
+  const m=$('user-menu-modal');
+  $('um-title').textContent=currentUser?.isGuest?'Modo Visitante':'Conta: '+currentUser?.name;
+  $('um-sub').textContent=currentUser?.isGuest?'Os seus dados estão salvos apenas neste dispositivo.':'Sessão activa · '+currentUser?.email;
+  const body=$('um-body');body.innerHTML='';
+  if(currentUser?.isGuest){
+    body.innerHTML=`<div style="background:var(--g0);border:1px solid var(--g1);border-radius:var(--radius);padding:13px;font-size:12px;color:var(--n6)">
+    <div style="font-weight:700;color:var(--g7);margin-bottom:5px">☁️ Benefícios de criar uma conta:</div>
+    <div>✅ Dados sincronizados entre dispositivos</div><div>✅ Backup automático</div><div>✅ Histórico completo</div></div>
+    <button class="btn btn-primary btn-full" onclick="closeModal('user-menu-modal');$('app-shell').style.display='none';$('auth-screen').classList.remove('hidden');switchAuthTab('register')">Criar conta gratuita</button>`;
+  } else {
+    body.innerHTML=`<div style="font-size:13px;color:var(--n6)">Fazenda: <strong>${currentUser?.farm||'—'}</strong></div>
+    <button class="btn btn-ghost btn-full" onclick="signOut()">Sair da conta</button>`;
+  }
+  m.classList.remove('hidden');
+}
+
+function showUpgradePrompt(){$('upgrade-modal').classList.remove('hidden');}
+
+function signOut(){
+  if(!confirm('Sair da conta?'))return;
+  currentUser=null;S.set('agro_current_user',null);
+  closeModal('user-menu-modal');
+  $('app-shell').style.display='none';
+  $('auth-screen').classList.remove('hidden');
+}
+
+function closeModal(id){$(id).classList.add('hidden');}
+
+/* ══ FARM ══ */
+function openFarmModal(){$('farm-name').value=currentUser?.farm||S.get('farm_name')||'';$('farm-safra').value=currentUser?.safra||S.get('farm_safra')||'';$('farm-modal').classList.remove('hidden');}
+function saveFarm(){
+  const fn=$('farm-name').value.trim(),fs=$('farm-safra').value.trim();
+  S.set('farm_name',fn);S.set('farm_safra',fs);
+  if(currentUser){currentUser.farm=fn;currentUser.safra=fs;S.set('agro_current_user',JSON.stringify(currentUser));}
+  closeModal('farm-modal');applyFarm();showToast('✅ Fazenda actualizada');
+}
+function applyFarm(){
+  const fn=currentUser?.farm||S.get('farm_name')||'';
+  const fs=currentUser?.safra||S.get('farm_safra')||'Pecuária de corte · Safra 2025';
+  if($('sb-farm-lbl'))$('sb-farm-lbl').textContent='🏡 '+(fn||'Configurar Fazenda');
+  if($('mob-hero-sub'))$('mob-hero-sub').textContent=fs;
+  if($('dw-name'))$('dw-name').textContent=(currentUser?.name||'Produtor').split(' ')[0];
+  if($('dw-sub'))$('dw-sub').textContent=(fn?'Fazenda '+fn+' · ':'')+fs;
+}
+
+/* ══ NAVIGATE ══ */
+const PAGES=['home','financeiro','pesagem','calendario','calculadora','anotacoes','sanitario'];
+const TITLES={home:'Início',financeiro:'Gestão Financeira',pesagem:'Pesagem & GMD',calendario:'Calendário',calculadora:'Calculadora',anotacoes:'Anotações',sanitario:'Sanitário'};
+
+function navigate(id){
+  PAGES.forEach(p=>{const pg=$('page-'+p);if(pg)pg.classList.remove('active');});
+  const pg=$('page-'+id);if(pg)pg.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  const sbi=$('sbi-'+id);if(sbi)sbi.classList.add('active');
+  document.querySelectorAll('.bn-item').forEach(el=>el.classList.remove('active'));
+  const bni=$('bni-'+id);if(bni)bni.classList.add('active');
+  if($('tb-title'))$('tb-title').textContent=(TITLES[id]||id)+' — AgroGestão';
+  if($('mob-hero'))$('mob-hero').style.display=(id==='home'&&window.innerWidth<1024)?'block':'none';
+  if($('fab'))$('fab').classList.toggle('hidden',id!=='calendario');
+  S.set('agro_screen_'+userKey(),id);
+  if(id==='home')renderAll();
+  if(id==='calendario')renderCal();
+  if(id==='anotacoes')renderNotas();
+  if(id==='sanitario')renderSan();
+}
+
+/* ══ RESPONSIVE ══ */
+function applyResponsive(){
+  const d=window.innerWidth>=1024;
+  if($('desk-welcome'))$('desk-welcome').style.display=d?'block':'none';
+  if($('kpi-grid'))$('kpi-grid').style.display=d?'grid':'none';
+  if($('tools-grid'))$('tools-grid').className=d?'g4':'g2';
+  const hb=$('home-bottom');if(hb){hb.style.display=d?'grid':'flex';if(d){hb.style.gridTemplateColumns='1fr 1fr';hb.style.gap='16px';}else{hb.style.gridTemplateColumns='';}}
+  if($('home-ev-col'))$('home-ev-col').style.display=d?'block':'none';
+  ['fin-layout','pes-layout','cal-layout','nota-layout','san-layout'].forEach(lid=>{
+    const el=$(lid);if(!el)return;
+    if(d){el.style.display='grid';el.style.gridTemplateColumns='1fr 1fr';el.style.gap='20px';}
+    else{el.style.display='flex';el.style.flexDirection='column';el.style.gap='12px';}
+  });
+  if(d&&$('kpi-grid'))renderKPIs();
+}
+window.addEventListener('resize',()=>{applyResponsive();if($('mob-hero'))$('mob-hero').style.display=(window.innerWidth<1024&&$('page-home').classList.contains('active'))?'block':'none';});
+
+/* ══ COST LINES ══ */
+let cid=0;
+function addCostLine(name='',val=''){
+  const id='cl-'+cid++;const div=document.createElement('div');div.className='cost-line';div.id=id;
+  div.innerHTML=`<div class="iwrap" style="flex:1.5"><input type="text" class="cname" placeholder="Ex: Ração" value="${name}" maxlength="28" oninput="atualizarPE()" style="font-size:13px;min-height:42px;font-weight:500"></div>
+  <div class="iwrap" style="flex:1"><span class="ipfx">R$</span><input type="number" class="cval" placeholder="0" min="0" step="1" inputmode="decimal" value="${val}" oninput="atualizarPE()" style="font-size:14px;min-height:42px"></div>
+  <div class="delbtn" onclick="this.closest('.cost-line').remove();atualizarPE()">✕</div>`;
+  $('cost-lines').appendChild(div);
+}
+function getCostTotal(){let t=0;document.querySelectorAll('.cost-line .cval').forEach(i=>t+=parseFloat(i.value)||0);return t;}
+
+/* ══ PE FINANCEIRO ══ */
+function atualizarPE(){
+  const ct=getCostTotal(),parr=parseFloat($('fin-parr').value)||0,arr=parseFloat($('fin-arrobas').value)||0;
+  $('pe-custo-total').textContent=ct>0?BRL(ct):'—';
+  if(arr>0&&ct>0){const pm=ct/arr;$('pe-preco-min').textContent=BRL(pm)+' / @';$('pe-preco-min').className='pv big';
+    if(parr>0){const m=((parr-pm)/pm)*100;const c=m>=0?'color:var(--g3)':'color:#fca5a5';$('pe-margem').innerHTML=`<span style="${c}">${m>=0?'+':''}${m.toFixed(1)}%</span>`;}
+    else $('pe-margem').textContent='—';
+  }else{$('pe-preco-min').textContent='—';$('pe-margem').textContent='—';}
+}
+
+/* ══ PE PESAGEM ══ */
+function atualizarPEPes(){
+  const ideal=parseFloat($('pes-ideal').value)||0,atual=parseFloat($('pes-atual').value)||0;
+  const preco=parseFloat($('pes-preco').value)||0,pvenda=parseFloat($('pes-pvenda').value)||0,dias=parseFloat($('pes-dias').value)||0;
+  if(ideal>0&&atual>0&&atual<ideal&&preco>0){
+    const def=ideal-atual,racao=def*7,custo=racao*preco,arr=def/15,pm=arr>0?custo/arr:0,gmd=dias>0?(def/dias).toFixed(2)+' kg/dia':'—';
+    $('ppe-gmd').textContent=gmd;$('ppe-custo').textContent=BRL(custo);$('ppe-arrobas').textContent=arr.toFixed(2)+' @';
+    $('ppe-pmin').textContent=pm>0?BRL(pm)+' / @':'—';
+    if(pvenda>0&&pm>0){const r=(pvenda-pm)*arr;const c=r>=0?'color:var(--g3)':'color:#fca5a5';$('ppe-resultado').innerHTML=`<span style="${c}">${BRL(r)}</span>`;}
+    else $('ppe-resultado').textContent='—';
+  }else{['ppe-gmd','ppe-custo','ppe-arrobas','ppe-pmin','ppe-resultado'].forEach(id=>$(id).textContent='—');}
+}
+
+/* ══ CALC FIN ══ */
+function calcularFinanceiro(){
+  const ganhos=parseFloat($('fin-ganhos').value);
+  $('wrap-ganhos').classList.remove('error');$('err-ganhos').classList.remove('visible');
+  if(isNaN(ganhos)||ganhos<0){$('wrap-ganhos').classList.add('error');$('err-ganhos').classList.add('visible');return;}
+  const ct=getCostTotal(),arr=parseFloat($('fin-arrobas').value)||0,lucro=ganhos-ct;
+  $('fin-r-ganhos').textContent=BRL(ganhos);$('fin-r-custos').textContent=BRL(ct);
+  $('fin-r-custarr').textContent=arr>0?BRL(ct/arr)+' / @':'—';
+  const el=$('fin-r-lucro');el.textContent=BRL(Math.abs(lucro));el.className='rv '+(lucro>=0?'grn':'red');
+  $('fin-resultado').classList.remove('hidden');
+  const s=$('fin-status');s.className='sbadge '+(lucro>=0?'success':'danger');
+  $('fin-st-txt').textContent=lucro>=0?'✅ OPERAÇÃO SAUDÁVEL':'❌ PREJUÍZO';
+  $('fin-st-sub').textContent=lucro>=0?'Resultado positivo.':'Reveja custos e estratégia.';
+  s.classList.remove('hidden');
+  saveHist({tipo:'Financeiro',resumo:`Receita ${BRL(ganhos)} · Custos ${BRL(ct)}`,resultado:`${lucro>=0?'+':''}${BRL(lucro)}`,ok:lucro>=0});
+}
+
+/* ══ CALC PES ══ */
+function calcularPesagem(){
+  const ideal=parseFloat($('pes-ideal').value),atual=parseFloat($('pes-atual').value),preco=parseFloat($('pes-preco').value);
+  let v=true;
+  [['wrap-ideal','err-ideal'],['wrap-atual','err-atual'],['wrap-preco','err-preco']].forEach(([w,e])=>{$(w).classList.remove('error');$(e).classList.remove('visible');});
+  if(isNaN(ideal)||ideal<=0){$('wrap-ideal').classList.add('error');$('err-ideal').classList.add('visible');v=false;}
+  if(isNaN(atual)||atual<=0){$('wrap-atual').classList.add('error');$('err-atual').classList.add('visible');v=false;}
+  if(isNaN(preco)||preco<=0){$('wrap-preco').classList.add('error');$('err-preco').classList.add('visible');v=false;}
+  if(!v)return;
+  const dias=parseFloat($('pes-dias').value)||0,lote=$('pes-lote').value.trim();
+  const s=$('pes-status'),np=$('nutri-panel');
+  if(atual>=ideal){
+    s.className='sbadge success';$('pes-st-txt').textContent='✅ Animal no peso ideal';
+    $('pes-st-sub').textContent=`${KG(atual)} atingiu a meta de ${KG(ideal)}.`;
+    s.classList.remove('hidden');np.classList.add('hidden');
+    saveHist({tipo:'Pesagem',resumo:`${lote||'Lote'} · Atual ${KG(atual)}`,resultado:'Peso certificado ✓',ok:true});
+  }else{
+    const def=ideal-atual,racao=def*7,custo=racao*preco,gmd=dias>0?(def/dias).toFixed(2)+' kg/dia':'—';
+    s.className='sbadge warning';$('pes-st-txt').textContent='⚠️ Animal abaixo do peso';
+    $('pes-st-sub').textContent=`Défice de ${KG(def)} — nutrição acionada.`;s.classList.remove('hidden');
+    $('n-defice').textContent=KG(def);$('n-gmd').textContent=gmd;$('n-racao').textContent=KG(racao);$('n-custo').textContent=BRL(custo);
+    np.classList.remove('hidden');
+    saveHist({tipo:'Pesagem',resumo:`${lote||'Lote'} · Défice ${KG(def)}`,resultado:`Ração: ${BRL(custo)}`,ok:false});
+  }
+}
+
+/* ══ HIST ══ */
+function histKey(){return 'agro_hist_'+userKey();}
+function saveHist(item){let h=S.gj(histKey());h.unshift({...item,ts:Date.now()});S.sj(histKey(),h.slice(0,5));renderHist();renderKPIs();}
+function renderHist(){
+  const h=S.gj(histKey()),list=$('hist-list');list.innerHTML=h.length?'':'<div class="hist-empty">Nenhum cálculo ainda.</div>';
+  h.forEach(item=>{const d=new Date(item.ts);const ds=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});const c=document.createElement('div');c.className='hist-card';c.innerHTML=`<div class="hist-head"><span class="hist-type">${item.tipo==='Financeiro'?'💰':'⚖️'} ${item.tipo}</span><span class="hist-date">${ds}</span></div><div class="hist-val" style="color:${item.ok?'var(--g5)':'var(--r6)'}">${item.resultado}</div><div class="hist-sub">${item.resumo}</div>`;list.appendChild(c);});
+}
+function renderKPIs(){
+  if(window.innerWidth<1024)return;
+  const h=S.gj(histKey()),grid=$('kpi-grid');if(!grid)return;
+  const fin=h.find(i=>i.tipo==='Financeiro'),pes=h.find(i=>i.tipo==='Pesagem');
+  const ev=S.gj(evKey()),today=new Date();today.setHours(0,0,0,0);
+  const soon=ev.filter(e=>{const d=new Date(e.data);d.setHours(0,0,0,0);return Math.round((d-today)/86400000)<=7&&d>=today;}).length;
+  const notas=S.gj(notasKey()).length;
+  grid.innerHTML=`<div class="stat-card green"><div class="sc-ico">💰</div><div class="sc-val green">${fin?fin.resultado:'—'}</div><div class="sc-lbl">Último Lucro/Prejuízo</div></div>
+  <div class="stat-card"><div class="sc-ico">⚖️</div><div class="sc-val">${pes?pes.resumo.split('·').pop().trim():'—'}</div><div class="sc-lbl">Última Pesagem</div></div>
+  <div class="stat-card amber"><div class="sc-ico">📅</div><div class="sc-val amber">${soon}</div><div class="sc-lbl">Alertas nos próx. 7 dias</div></div>
+  <div class="stat-card blue"><div class="sc-ico">📝</div><div class="sc-val">${notas}</div><div class="sc-lbl">Anotações</div></div>`;
+}
+
+/* ══ ALERTS ══ */
+function evKey(){return 'agro_events_'+userKey();}
+function renderAlerts(){
+  const wrap=$('alerts-wrap');wrap.innerHTML='';
+  const events=S.gj(evKey()),today=new Date();today.setHours(0,0,0,0);
+  const soon=events.filter(e=>{const d=new Date(e.data);d.setHours(0,0,0,0);return Math.round((d-today)/86400000)<=7&&d>=today;}).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,3);
+  const badge=$('bn-badge');if(badge)badge.classList.toggle('hidden',!soon.length);
+  wrap.style.display=soon.length?'flex':'none';wrap.style.flexDirection='column';wrap.style.gap='6px';
+  soon.forEach(ev=>{const d=new Date(ev.data);d.setHours(0,0,0,0);const diff=Math.round((d-today)/86400000);const cls=diff===0?'red':diff<=2?'':'green';const item=document.createElement('div');item.className=`alert-item ${cls}`;item.innerHTML=`<div class="al-dot"></div><div class="al-txt">${ev.desc}${ev.lote?' · '+ev.lote:''}</div><div class="al-date">${diff===0?'Hoje':diff===1?'Amanhã':'Em '+diff+'d'}</div>`;item.onclick=()=>navigate('calendario');wrap.appendChild(item);});
+  // home event col
+  const hel=$('home-ev-list');if(hel){const upcoming=events.filter(e=>new Date(e.data)>=today).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,5);hel.innerHTML=upcoming.length?'':'<div class="hist-empty">Sem eventos.</div>';upcoming.forEach(ev=>{const c=document.createElement('div');c.className='hist-card';c.innerHTML=`<div class="hist-head"><span class="hist-type">📅 ${ev.tipo}</span><span class="hist-date">${ev.data.split('-').reverse().join('/')}</span></div><div class="hist-val">${ev.desc}</div><div class="hist-sub">${ev.lote||''}</div>`;hel.appendChild(c);});}
+}
+
+/* ══ CALENDAR ══ */
+let calY=new Date().getFullYear(),calM=new Date().getMonth(),calSel=null;
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function calNav(dir){calM+=dir;if(calM>11){calM=0;calY++;}else if(calM<0){calM=11;calY--;}renderCal();}
+function renderCal(){
+  $('cal-month').textContent=MESES[calM]+' '+calY;const grid=$('cal-grid');grid.innerHTML='';
+  ['D','S','T','Q','Q','S','S'].forEach(d=>{const el=document.createElement('div');el.className='cal-dow';el.textContent=d;grid.appendChild(el);});
+  const first=new Date(calY,calM,1).getDay(),days=new Date(calY,calM+1,0).getDate(),prev=new Date(calY,calM,0).getDate();
+  const today=new Date(),events=S.gj(evKey());
+  for(let i=0;i<first;i++){const el=document.createElement('div');el.className='cal-day other';el.textContent=prev-first+1+i;grid.appendChild(el);}
+  for(let d=1;d<=days;d++){const el=document.createElement('div');el.className='cal-day';el.textContent=d;const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;if(today.getDate()===d&&today.getMonth()===calM&&today.getFullYear()===calY)el.classList.add('today');if(calSel===ds)el.classList.add('selected');if(events.some(e=>e.data===ds))el.classList.add('has-ev');el.onclick=()=>{calSel=ds;$('ev-data').value=ds;renderCal();renderEvList(ds);};grid.appendChild(el);}
+  const rem=(7-((first+days)%7))%7;for(let i=1;i<=rem;i++){const el=document.createElement('div');el.className='cal-day other';el.textContent=i;grid.appendChild(el);}
+  renderEvList(calSel);
+}
+let evId=Date.now();
+function saveEvent(){
+  const desc=$('ev-desc').value.trim();if(!desc)return;
+  const events=S.gj(evKey());const dataVal=$('ev-data').value||$('san-data').value;
+  events.push({id:evId++,tipo:$('ev-tipo').value,desc,lote:$('ev-lote').value.trim(),data:dataVal});
+  S.sj(evKey(),events);$('ev-desc').value='';$('ev-lote').value='';$('add-ev-panel').classList.remove('visible');renderCal();renderAlerts();
+}
+function renderEvList(ds){
+  const events=S.gj(evKey()),list=$('ev-list'),label=$('ev-list-lbl');list.innerHTML='';
+  const f=ds?events.filter(e=>e.data===ds):events.filter(e=>new Date(e.data)>=new Date()).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,12);
+  label.textContent=ds?'Eventos em '+ds.split('-').reverse().join('/'):' Próximos Eventos';
+  if(!f.length){list.innerHTML='<div class="hist-empty">Nenhum evento.</div>';return;}
+  const bm={sanitario:'background:var(--r1);color:var(--r6)',pesagem:'background:var(--b1);color:var(--b6)',financeiro:'background:var(--a1);color:var(--a6)',geral:'background:var(--g1);color:var(--g7)'};
+  f.forEach(ev=>{const item=document.createElement('div');item.className=`ev-item ${ev.tipo}`;item.innerHTML=`<div style="flex:1"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px"><span class="ev-title">${ev.desc}</span><span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;${bm[ev.tipo]||bm.geral}">${ev.tipo}</span></div><div class="ev-sub">${ev.data.split('-').reverse().join('/')}${ev.lote?' · '+ev.lote:''}</div></div><div style="cursor:pointer;color:var(--n4);padding:0 4px;font-size:15px" onclick="deleteEv(${ev.id})">✕</div>`;list.appendChild(item);});
+}
+function deleteEv(id){let ev=S.gj(evKey());ev=ev.filter(e=>e.id!==id);S.sj(evKey(),ev);renderCal();renderAlerts();}
+
+/* ══ CALCULATOR ══ */
+let cExpr='';
+function ci(v){cExpr+=v;$('calc-expr').textContent=cExpr;try{const r=Function('"use strict";return('+cExpr+')')();$('calc-result').textContent=isFinite(r)?+r.toFixed(6):'';}catch{}}
+function calcClear(){cExpr='';$('calc-expr').textContent='';$('calc-result').textContent='0';}
+function calcBack(){cExpr=cExpr.slice(0,-1);$('calc-expr').textContent=cExpr;try{const r=Function('"use strict";return('+cExpr+')')();$('calc-result').textContent=isFinite(r)?+r.toFixed(6):'';}catch{}}
+function calcEq(){try{const r=Function('"use strict";return('+cExpr+')')();$('calc-result').textContent=isFinite(r)?+r.toFixed(6):'Erro';$('calc-expr').textContent=cExpr+' =';cExpr=String(isFinite(r)?+r.toFixed(6):0);}catch{$('calc-result').textContent='Erro';}}
+function switchCalcTab(t){['normal','dose','supl'].forEach(tab=>{$('ctab-'+tab).classList.toggle('active',tab===t);$('cpanel-'+tab).style.display=tab===t?'block':'none';});}
+function calcDose(){const p=parseFloat($('dose-peso').value)||0,d10=parseFloat($('dose-por10').value)||0;if(p>0&&d10>0){const dose=(p/10)*d10;$('dose-val').textContent=dose.toFixed(1)+' ml';$('dose-sub').textContent=`Para animal de ${p} kg`;}else{$('dose-val').textContent='—';$('dose-sub').textContent='Preencha peso e dose';}}
+function calcSupl(){const a=parseFloat($('supl-animais').value)||0,c=parseFloat($('supl-cons').value)||0,d=parseFloat($('supl-dias').value)||0,p=parseFloat($('supl-preco').value)||0;if(a>0&&c>0&&d>0){const tg=a*c*d,tk=tg/1000;$('supl-val').textContent=tk.toFixed(1)+' kg';$('supl-sub').textContent=tg.toLocaleString('pt-BR')+' g'+(p>0?' · Custo: '+BRL(tk*p):'');}else{$('supl-val').textContent='—';$('supl-sub').textContent='Preencha os campos';}}
+
+/* ══ NOTAS ══ */
+function notasKey(){return 'agro_notas_'+userKey();}
+let nFotos=[],nAudio=false,nAudioSec=0,nAudioTimer=null;
+function toggleFoto(){$('foto-input').click();}
+function onFotoChange(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{nFotos.push(ev.target.result);renderMPrev();$('btn-foto').classList.add('on');};r.readAsDataURL(f);}
+function renderMPrev(){const p=$('m-prev');p.innerHTML='';nFotos.forEach((src,i)=>{const t=document.createElement('div');t.className='m-thumb';t.innerHTML=`<img src="${src}"><div class="rm" onclick="nFotos.splice(${i},1);renderMPrev()">✕</div>`;p.appendChild(t);});}
+function toggleAudio(){if(!nAudio){nAudio=true;nAudioSec=0;$('btn-audio').classList.add('on');$('audio-ind').classList.remove('hidden');nAudioTimer=setInterval(()=>{nAudioSec++;const m=Math.floor(nAudioSec/60),s=String(nAudioSec%60).padStart(2,'0');$('audio-timer').textContent=m+':'+s;},1000);}else{nAudio=false;clearInterval(nAudioTimer);$('btn-audio').classList.remove('on');$('audio-ind').classList.add('hidden');}}
+function salvarNota(){const txt=$('nota-texto').value.trim();if(!txt)return;const notas=S.gj(notasKey());notas.unshift({id:Date.now(),lote:$('nota-lote').value.trim()||'Geral',texto:txt,fotos:[...nFotos],audio:nAudio&&nAudioSec>0,audioDur:nAudioSec,ts:Date.now()});S.sj(notasKey(),notas.slice(0,20));$('nota-texto').value='';$('nota-lote').value='';nFotos=[];nAudio=false;nAudioSec=0;clearInterval(nAudioTimer);$('btn-foto').classList.remove('on');$('btn-audio').classList.remove('on');$('audio-ind').classList.add('hidden');$('m-prev').innerHTML='';renderNotas();renderKPIs();}
+function renderNotas(){const notas=S.gj(notasKey()),list=$('notas-list');list.innerHTML=notas.length?'':'<div class="hist-empty">Nenhuma anotação ainda.</div>';notas.forEach(n=>{const d=new Date(n.ts),ds=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});const c=document.createElement('div');c.className='nota-card';c.innerHTML=`<div class="nota-head"><div class="nota-title">${n.texto.substring(0,60)}${n.texto.length>60?'…':''}</div><div class="nota-lote">${n.lote}</div></div>${n.fotos&&n.fotos.length?`<div style="display:flex;gap:5px;padding:0 12px 9px;overflow-x:auto">${n.fotos.map(f=>`<img src="${f}" style="width:52px;height:52px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0">`).join('')}</div>`:''}<div class="nota-foot"><span class="nota-date">${ds}</span>${n.fotos&&n.fotos.length?`<span class="nota-badge">📷 ${n.fotos.length}</span>`:''} ${n.audio?`<span class="nota-badge">🎙️ ${Math.floor(n.audioDur/60)}:${String(n.audioDur%60).padStart(2,'0')}</span>`:''}</div>`;list.appendChild(c);});}
+
+/* ══ SANITÁRIO ══ */
+function sanKey(){return 'agro_san_'+userKey();}
+function salvarSanitario(){
+  const data=$('san-data').value;if(!data)return;
+  const tipo=$('san-tipo').value,lote=$('san-lote').value.trim(),intervalo=parseInt($('san-intervalo').value)||0,obs=$('san-obs').value.trim();
+  const san=S.gj(sanKey());san.unshift({id:Date.now(),tipo,lote,data,intervalo,obs,ts:Date.now()});S.sj(sanKey(),san);
+  if(intervalo>0){const d=new Date(data);d.setDate(d.getDate()+intervalo);const nd=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const ev=S.gj(evKey());ev.push({id:evId++,tipo:'sanitario',desc:'📅 Próx. '+tipo,lote,data:nd});S.sj(evKey(),ev);}
+  $('san-lote').value='';$('san-data').value='';$('san-intervalo').value='';$('san-obs').value='';
+  renderSan();renderAlerts();showToast('✅ Registado! Alerta agendado'+(intervalo>0?' em '+intervalo+'d':'')+'.');
+}
+function renderSan(){const san=S.gj(sanKey()),list=$('san-list');list.innerHTML=san.length?'':'<div class="hist-empty">Nenhum registro ainda.</div>';san.forEach(s=>{const c=document.createElement('div');c.className='hist-card';c.innerHTML=`<div class="hist-head"><span class="hist-type" style="color:var(--r6)">💉 ${s.tipo}</span><span class="hist-date">${s.data.split('-').reverse().join('/')}</span></div><div class="hist-val">${s.lote||'Sem lote'}</div><div class="hist-sub">${s.obs||'—'}${s.intervalo?' · Repete em '+s.intervalo+'d':''}</div>`;list.appendChild(c);});}
+
+/* ══ TOAST ══ */
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.style.opacity='0',2000);setTimeout(()=>t.remove(),2400);}
+
+/* ══ RENDER ALL ══ */
+function renderAll(){renderHist();renderAlerts();renderKPIs();}
+
+/* ══ BOOT ══ */
+function boot(){
+  const saved=S.get('agro_current_user');
+  if(saved){try{currentUser=JSON.parse(saved);launchApp();return;}catch{}}
+  // Show auth
+  $('auth-screen').classList.remove('hidden');
+}
+boot();
+</script>
+</body>
+</html>
